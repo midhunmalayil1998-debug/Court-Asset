@@ -60,7 +60,6 @@
             gap: 8px;
         }
 
-        /* STATUS BADGE */
         .status-indicator { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; }
         .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
         .status-connected { background: #d1fae5; color: #065f46; }
@@ -89,24 +88,10 @@
             font-size: 0.95rem; 
             font-family: inherit; 
             background: #ffffff; 
-            transition: 0.2s ease;
         }
 
-        .form-group input:focus, .form-group select:focus {
-            border-color: var(--brand);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-        }
-
-        .grid-2 { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 10px; 
-        }
-
-        @media(max-width: 480px) {
-            .grid-2 { grid-template-columns: 1fr; }
-        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media(max-width: 480px) { .grid-2 { grid-template-columns: 1fr; } }
 
         .section-box {
             background: #f1f5f9;
@@ -141,7 +126,6 @@
             color: var(--danger); 
             cursor: pointer; 
             font-size: 1rem; 
-            padding: 4px;
         }
 
         .btn { 
@@ -156,11 +140,9 @@
             justify-content: center; 
             gap: 8px; 
             width: 100%;
-            transition: 0.2s ease;
         }
 
         .btn-primary { background: var(--brand); color: white; }
-        .btn-primary:active { background: var(--brand-dark); transform: scale(0.98); }
         .btn-add { background: var(--brand-light); color: var(--brand); border: 1px dashed var(--brand); padding: 10px; }
 
         .duplicate-error {
@@ -171,13 +153,14 @@
 </head>
 <body>
 
+<!-- 🔍 DATALISTS FOR AUTO-FETCH SUGGESTIONS -->
 <datalist id="listDesignations"></datalist>
 <datalist id="listMakes"></datalist>
 <datalist id="listModels"></datalist>
+<datalist id="listSerials"></datalist> <!-- 👈 Added Serial Number Datalist -->
 
 <div class="entry-card">
     
-    <!-- HEADER -->
     <div class="header">
         <h2><i class="fa-solid fa-laptop-medical"></i> Hardware Allotment</h2>
         <div id="connectionStatus" class="status-indicator status-syncing">
@@ -185,7 +168,6 @@
         </div>
     </div>
 
-    <!-- 🏛️ COURT SELECTION DROPDOWN -->
     <div class="form-group">
         <label><i class="fa-solid fa-gavel"></i> Select Court Jurisdiction *</label>
         <select id="inputCourt">
@@ -193,7 +175,6 @@
         </select>
     </div>
 
-    <!-- STAFF & SEAT DETAILS -->
     <div class="grid-2">
         <div class="form-group">
             <label>Staff Name *</label>
@@ -216,7 +197,6 @@
         </div>
     </div>
 
-    <!-- OPTIONAL AMC / WARRANTY DATES -->
     <div class="section-box">
         <span class="section-title"><i class="fa-solid fa-shield-halved"></i> Warranty / AMC Dates (Optional)</span>
         <div class="grid-2">
@@ -229,7 +209,6 @@
         </div>
     </div>
 
-    <!-- DYNAMIC DEVICES LIST -->
     <div style="display:flex; justify-content:space-between; align-items:center; margin: 15px 0 10px 0;">
         <span class="section-title" style="margin:0;"><i class="fa-solid fa-hard-drive"></i> Hardware Devices List</span>
     </div>
@@ -240,7 +219,6 @@
         <i class="fa-solid fa-plus"></i> Add Another Device
     </button>
 
-    <!-- SAVE BUTTON -->
     <button class="btn btn-primary" onclick="saveAssetEntry()">
         <i class="fa-solid fa-paper-plane"></i> Submit & Save Allotment
     </button>
@@ -257,12 +235,11 @@
         { id: 'Subcourt', name: 'Sub Court, Kozhikode' }
     ];
 
-    let existingSerials = new Set(); // Stores all existing serial numbers across database
-    let globalStore = {};
+    let existingSerials = new Set();
 
     window.onload = function() {
         populateCourtDropdown(defaultCourts);
-        addDeviceRow(); // Initial Row
+        addDeviceRow();
         loadMasterData();
     };
 
@@ -297,9 +274,10 @@
     function postToScript(payload) {
         fetch(apiURL, {
             method: 'POST',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
-        }).catch(err => console.error("Background sync error:", err));
+        }).catch(err => console.error("Sync error:", err));
     }
 
     function populateCourtDropdown(courts) {
@@ -310,34 +288,30 @@
         });
     }
 
-    /* 🚀 LOAD DATA & EXTRACT ALL EXISTING SERIAL NUMBERS FOR DUPLICATE CHECK */
     async function loadMasterData() {
         updateConnectionStatus('syncing', 'Syncing Data...');
         try {
             const data = await jsonpFetch(`${apiURL}?action=getAllData`);
             if(data) {
-                if(data.courtsList && data.courtsList.length > 0) {
-                    populateCourtDropdown(data.courtsList);
-                }
-
+                if(data.courtsList && data.courtsList.length > 0) populateCourtDropdown(data.courtsList);
+                
+                // 🔍 POPULATE MASTER DATALISTS
                 if(data.master) {
                     populateDatalist('listDesignations', data.master.designations);
                     populateDatalist('listMakes', data.master.makes);
                     populateDatalist('listModels', data.master.models);
+                    populateDatalist('listSerials', data.master.serials); // 👈 Automatically fetches serial numbers from Master Sheet
                 }
 
-                // Collect ALL Serial Numbers across all courts (Active + E-Waste)
                 existingSerials.clear();
                 if(data.courtsData) {
                     Object.keys(data.courtsData).forEach(cId => {
                         const assets = data.courtsData[cId].assets || [];
                         const ewaste = data.courtsData[cId].ewaste || [];
-                        
                         assets.forEach(a => { if(a[3]) existingSerials.add(String(a[3]).toUpperCase().trim()); });
                         ewaste.forEach(e => { if(e[2]) existingSerials.add(String(e[2]).toUpperCase().trim()); });
                     });
                 }
-
                 updateConnectionStatus('connected', 'Ready');
             }
         } catch(e) {
@@ -351,7 +325,6 @@
         (items || []).forEach(item => { dl.innerHTML += `<option value="${item}">`; });
     }
 
-    /* 💡 DYNAMIC MULTIPLE DEVICES ROW CREATOR */
     function addDeviceRow() {
         const container = document.getElementById('devicesContainer');
         const rowId = 'dev_' + Date.now() + Math.random().toString(36).substr(2, 4);
@@ -371,7 +344,8 @@
                 </div>
                 <div class="form-group" style="margin:10px 0 0 0;">
                     <label>Serial Number (Unique) *</label>
-                    <input type="text" class="dev-serial" placeholder="Type Serial No" style="font-family:monospace; font-weight:bold;" oninput="validateSerialInput(this)">
+                    <!-- 🔍 list="listSerials" ADDED BELOW FOR AUTOFETCH SUGGESTIONS -->
+                    <input type="text" class="dev-serial" list="listSerials" placeholder="Select or Type Serial No" style="font-family:monospace; font-weight:bold;" oninput="validateSerialInput(this)">
                 </div>
             </div>
         `;
@@ -380,14 +354,11 @@
 
     function removeDeviceRow(rowId) {
         const rows = document.querySelectorAll('.device-row');
-        if(rows.length <= 1) {
-            return Swal.fire('Notice', 'At least one device is required.', 'info');
-        }
+        if(rows.length <= 1) return Swal.fire('Notice', 'At least one device is required.', 'info');
         const el = document.getElementById(rowId);
         if(el) el.remove();
     }
 
-    /* 🚫 REAL-TIME DUPLICATE SERIAL NUMBER VALIDATION */
     function validateSerialInput(inputEl) {
         const serial = inputEl.value.trim().toUpperCase();
         if(!serial) {
@@ -395,13 +366,11 @@
             return true;
         }
 
-        // Check 1: Check against Database
         if(existingSerials.has(serial)) {
             inputEl.classList.add('duplicate-error');
             return false;
         }
 
-        // Check 2: Check against other Serial fields in current form
         const serialInputs = document.querySelectorAll('.dev-serial');
         let count = 0;
         serialInputs.forEach(inp => {
@@ -417,7 +386,6 @@
         return true;
     }
 
-    /* 💾 SAVE ASSET ENTRY FUNCTION */
     async function saveAssetEntry() {
         const courtId = document.getElementById('inputCourt').value;
         const staff = document.getElementById('inputStaff').value.trim();
@@ -446,7 +414,6 @@
 
             if(!serial) return;
 
-            // Duplicate Check
             if(!validateSerialInput(serialInput)) {
                 hasDuplicate = true;
                 invalidSerialName = serial;
@@ -455,18 +422,14 @@
             devices.push({ make, model, serial });
         });
 
-        if(devices.length === 0) {
-            return Swal.fire('Required', 'Please fill at least one device Serial Number.', 'error');
-        }
+        if(devices.length === 0) return Swal.fire('Required', 'Please fill at least one device Serial Number.', 'error');
 
         if(hasDuplicate) {
-            return Swal.fire('Duplicate Serial Number!', `Serial Number <b>"${invalidSerialName}"</b> already exists in the system or is duplicated in this form!`, 'error');
+            return Swal.fire('Duplicate Serial Number!', `Serial Number <b>"${invalidSerialName}"</b> already exists in the system!`, 'error');
         }
 
-        // Add serials locally to avoid immediate re-use
         devices.forEach(d => existingSerials.add(d.serial));
 
-        // Submit to Google Sheet Background
         postToScript({ 
             action: 'saveMultiAssets', 
             page: courtId, 
@@ -474,16 +437,15 @@
             wStart, wEnd, amcStart, amcEnd
         });
 
-        // Instant Success Alert
         Swal.fire({
             icon: 'success',
             title: 'Allotment Saved!',
-            text: 'Hardware entry saved successfully.',
+            text: 'Hardware entry submitted successfully.',
             timer: 2000,
             showConfirmButton: false
         });
 
-        // Reset Form Fields for next entry
+        // Reset Form
         document.getElementById('inputStaff').value = "";
         document.getElementById('inputDesig').value = "";
         document.getElementById('inputInstallDate').value = "";
