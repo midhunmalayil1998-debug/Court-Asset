@@ -2,1929 +2,659 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>District Court Kozhikode - Enterprise IT Management Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>District Court Kozhikode - Mobile IT Asset Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    
+
     <style>
         :root {
-            --brand: #2563eb; --brand-dark: #1e3a8a; --brand-light: #eff6ff;
-            --sidebar-bg: #0f172a; --sidebar-hover: #1e293b; --sidebar-text: #94a3b8;
-            --surface: #ffffff; --bg: #f8fafc; --text-main: #0f172a; --text-sub: #64748b;
-            --border: #e2e8f0; --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 14px -2px rgba(0,0,0,0.08); --shadow-lg: 0 12px 28px -4px rgba(0,0,0,0.12);
-            --danger: #ef4444; --warning: #d97706; --success: #10b981;
+            --primary-blue: #004085;
+            --brand-blue: #2563eb;
+            --bg-gradient: #eef2f7;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --danger: #ef4444;
+            --success: #10b981;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; min-height: 100vh; display: flex; }
-        .sidebar { width: 260px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0; z-index: 100; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 4px 0 20px rgba(0,0,0,0.08); }
-        .sidebar-brand { padding: 20px; font-size: 1.05rem; font-weight: 800; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; letter-spacing: 0.3px; }
-        .sidebar-brand i { background: rgba(37, 99, 235, 0.15); padding: 8px; border-radius: 8px; color: #60a5fa; }
-        .sidebar-menu { list-style: none; padding: 12px; margin: 0; flex: 1; overflow-y: auto; }
-        .sidebar-menu::-webkit-scrollbar { width: 5px; }
-        .sidebar-menu::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        .sidebar-item { padding: 11px 14px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; transition: all 0.2s ease; color: var(--sidebar-text); position: relative; }
-        .sidebar-item:hover { background: var(--sidebar-hover); color: #ffffff; transform: translateX(2px); }
-        .sidebar-item.active { background: var(--brand); color: #ffffff; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-        .sidebar-item-content { display: flex; align-items: center; gap: 12px; }
-        .sidebar-item-content i { font-size: 1rem; width: 18px; text-align: center; }
-        .sidebar-item .chevron { font-size: 0.72rem; transition: transform 0.25s ease; opacity: 0.7; }
-        .sidebar-item.open .chevron { transform: rotate(180deg); opacity: 1; }
-        .sidebar-submenu { list-style: none; padding: 2px 0 6px 18px; margin: 0; display: none; border-left: 2px solid rgba(255,255,255,0.08); margin-left: 20px; }
-        .sidebar-submenu.open { display: block; animation: slideDown 0.25s ease; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-        .submenu-item { padding: 8px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; color: #94a3b8; display: flex; align-items: center; gap: 10px; margin-bottom: 2px; transition: all 0.2s ease; }
-        .submenu-item i { font-size: 0.85rem; width: 16px; text-align: center; }
-        .submenu-item:hover { color: #ffffff; background: rgba(255,255,255,0.05); }
-        .submenu-item.active { color: #60a5fa; font-weight: 800; background: rgba(37, 99, 235, 0.15); }
-        .main-wrapper { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-width: 0; transition: margin-left 0.3s ease; }
-        .navbar { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 14px 35px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 50; }
-        .navbar-title { font-weight: 800; font-size: 1.15rem; color: var(--text-main); }
-        .container { padding: 25px 35px; }
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.2s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        .status-indicator { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 30px; font-size: 0.78rem; font-weight: 700; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-        .status-connected { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
-        .status-connected .status-dot { background: #10b981; }
-        .status-syncing { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
-        .status-syncing .status-dot { background: #f59e0b; animation: pulse 1s infinite alternate; }
-        .status-offline { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-        .status-offline .status-dot { background: #ef4444; }
-        @keyframes pulse { 0% { opacity: 0.4; } 100% { opacity: 1; } }
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 25px; }
-        .metric-card { background: var(--surface); padding: 18px 20px; border-radius: 14px; border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-        .metric-card i { font-size: 1.3rem; color: var(--brand); margin-bottom: 8px; display: block; }
-        .metric-card .val { font-size: 1.8rem; font-weight: 800; }
-        .metric-card .lbl { font-size: 0.75rem; color: var(--text-sub); font-weight: 800; text-transform: uppercase; }
-        .complex-group-section { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; margin-bottom: 25px; box-shadow: var(--shadow-sm); }
-        .complex-group-title { font-size: 1.1rem; font-weight: 800; color: var(--brand-dark); margin: 0 0 15px 0; display: flex; align-items: center; gap: 10px; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        .courts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
-        .court-card { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; cursor: pointer; transition: 0.25s ease; position: relative; }
-        .court-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--brand); background: var(--surface); }
-        .court-card h3 { margin: 0 0 6px 0; font-size: 1rem; font-weight: 800; }
-        .search-match-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 8px 12px; margin-top: 10px; font-size: 0.75rem; }
-        .search-match-box strong { color: var(--brand-dark); display: block; margin-bottom: 2px; }
-        .search-box { background: var(--surface); border: 1px solid var(--border); padding: 10px 18px; border-radius: 30px; display: flex; align-items: center; gap: 10px; }
-        .search-box input { border: none; outline: none; background: transparent; width: 100%; font-size: 0.9rem; font-family: inherit; }
-        .btn { border: 1px solid var(--border); padding: 10px 18px; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; background: var(--surface); color: var(--text-main); }
-        .btn-primary { background: var(--brand); color: white; border-color: var(--brand); }
-        .btn-danger { background: var(--danger); color: white; border-color: var(--danger); }
-        .btn-success { background: var(--success); color: white; border-color: var(--success); }
-        .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 8px; }
-        .panel-box { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); padding: 22px; box-shadow: var(--shadow-sm); margin-bottom: 25px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-        th { background: #f8fafc; padding: 12px; font-size: 0.75rem; text-transform: uppercase; color: var(--text-sub); font-weight: 800; border: 1px solid var(--border); }
-        td { padding: 12px; border: 1px solid var(--border); vertical-align: middle; }
-        tr:hover td { background: #f8fafc; }
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 800; text-transform: uppercase; display: inline-flex; align-items: center; gap: 5px; }
-        .badge-active { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-expired { background: #fee2e2; color: #991b1b; }
-        .badge-none { background: #e2e8f0; color: #475569; }
-        .badge-info { background: #e0f2fe; color: #0369a1; }
-        .copy-serial { cursor: pointer; font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); display: none; z-index: 101; }
-        .modal-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 680px; max-width: 92%; max-height: 88vh; overflow-y: auto; background: var(--surface); border-radius: 20px; padding: 28px; z-index: 102; display: none; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; margin-bottom: 6px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 10px; box-sizing: border-box; font-size: 0.9rem; font-family: inherit; background: var(--bg); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .device-row { background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 12px; margin-bottom: 12px; position: relative; }
-        .remove-device-btn { position: absolute; right: 12px; top: 12px; color: var(--danger); cursor: pointer; font-size: 0.9rem; }
-        .duplicate-error { border-color: var(--danger) !important; background-color: #fef2f2 !important; }
-        @media print {
-            .sidebar, .navbar, .btn, .search-box, #homeView, .no-print { display: none !important; }
-            .main-wrapper { margin-left: 0 !important; }
-            .container { padding: 0 !important; }
-            .panel-box { border: none !important; box-shadow: none !important; padding: 0 !important; }
-            body { background: white !important; }
-            table { font-size: 9pt !important; width: 100% !important; }
-            th, td { border: 1px solid #000 !important; padding: 5px !important; }
+
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { 
+            margin: 0; 
+            background: #cbd5e1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh;
         }
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: radial-gradient(circle at top right, #1e293b, #0f172a); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; }
-        .login-card { background: #ffffff; padding: 22px 24px; border-radius: 14px; width: 100%; max-width: 310px; box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.1); animation: loginModalAppear 0.25s ease-out; }
-        .login-header { text-align: center; margin-bottom: 16px; }
-        .login-icon-badge { width: 42px; height: 42px; background: #eff6ff; color: var(--brand); border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 8px; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.15); }
-        .login-header h2 { margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
-        .login-header p { margin: 4px 0 0 0; font-size: 0.78rem; color: var(--text-sub); font-weight: 600; }
-        .form-group-login { margin-bottom: 12px; }
-        .form-group-login label { display: block; font-size: 0.75rem; font-weight: 800; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
-        .input-icon-wrapper { position: relative; display: flex; align-items: center; }
-        .input-icon-wrapper i { position: absolute; left: 14px; color: #94a3b8; font-size: 0.95rem; transition: color 0.2s ease; }
-        .input-icon-wrapper input { width: 100%; padding: 8px 12px 8px 36px; border: 1.5px solid var(--border); border-radius: 10px; box-sizing: border-box; font-size: 0.85rem; font-family: inherit; background: #f8fafc; transition: all 0.2s ease; }
-        .input-icon-wrapper input:focus { outline: none; border-color: var(--brand); background: #ffffff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
-        .login-error-msg { display: none; background: #fef2f2; color: #dc2626; padding: 10px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; margin-bottom: 18px; text-align: left; border: 1px solid #fca5a5; align-items: center; gap: 8px; }
-        .btn-login-submit { width: 100%; padding: 9px; background: var(--brand); color: #ffffff; border: none; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
-        .btn-login-submit:hover { background: #1d4ed8; transform: translateY(-1px); }
-        .login-footer { margin-top: 14px; text-align: center; font-size: 0.68rem; color: #94a3b8; font-weight: 600; }
-        .sidebar-user-footer { padding: 14px 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); background: rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; gap: 10px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 34px; height: 34px; background: rgba(255, 255, 255, 0.1); color: #60a5fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-        .btn-logout { width: 100%; background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s ease; }
-        .btn-logout:hover { background: var(--danger); color: #ffffff; border-color: var(--danger); }
+
+        /* 📱 EXACT MOBILE CARD CONTAINER (IMAGE DESIGN) */
+        .mobile-frame {
+            width: 100%;
+            max-width: 410px;
+            min-height: 92vh;
+            background: linear-gradient(180deg, #ffffff 0%, #e2e8f0 100%);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Header Bar */
+        .mobile-header {
+            background: #003366;
+            color: #ffffff;
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        .sync-dot {
+            width: 8px; height: 8px; border-radius: 50%; display: inline-block;
+        }
+        .sync-online { background: #10b981; }
+        .sync-syncing { background: #f59e0b; }
+        .sync-offline { background: #ef4444; }
+
+        /* Default Court Selector Bar */
+        .default-court-bar {
+            background: #0f172a;
+            color: #fff;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+        }
+        .default-court-bar select {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.78rem;
+            width: 55%;
+            outline: none;
+        }
+        .default-court-bar select option { background: #0f172a; color: #fff; }
+
+        /* View Content Areas */
+        .view-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: none;
+        }
+        .view-content.active { display: block; }
+
+        /* 🏠 HOME SCREEN UI (EXACT MATCH TO YOUR IMAGE) */
+        .home-brand-box {
+            text-align: center;
+            margin: 40px 0 30px 0;
+        }
+        .home-brand-icon {
+            font-size: 3rem;
+            color: #2563eb;
+            margin-bottom: 12px;
+        }
+        .home-brand-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #003366;
+        }
+        .home-brand-sub {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* White Action Cards */
+        .app-action-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .app-action-card:active {
+            transform: scale(0.98);
+            background: #f8fafc;
+        }
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .icon-blue { background: #eff6ff; color: #2563eb; }
+        .icon-yellow { background: #fef3c7; color: #d97706; }
+
+        .card-text-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .card-text-desc {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 2px;
+        }
+
+        /* Forms & Inputs */
+        .nav-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+
+        .form-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+            background: #f8fafc;
+        }
+        .form-group input:focus { border-color: #2563eb; background: #fff; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .device-row {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        .remove-dev-btn {
+            position: absolute; right: 8px; top: 8px; color: #ef4444; font-size: 0.85rem; cursor: pointer;
+        }
+
+        .btn {
+            width: 100%; padding: 12px; border-radius: 10px; font-size: 0.88rem; font-weight: 800;
+            border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-secondary { background: #e2e8f0; color: #0f172a; }
+
+        /* Manage Assets Cards */
+        .asset-item-card {
+            background: #ffffff; border-radius: 12px; padding: 12px; margin-bottom: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; border: 1px solid #e2e8f0;
+        }
+        .asset-item-card:active { background: #eff6ff; border-color: #2563eb; }
+        .seat-tag { font-size: 0.72rem; font-weight: 800; color: #2563eb; }
+        .staff-name { font-size: 0.9rem; font-weight: 800; margin: 2px 0 4px 0; }
+        .serial-no { font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; font-size: 0.75rem; }
+
+        /* Edit Modal Overlay */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; z-index: 100; }
+        .modal-box { position: fixed; bottom: 0; left: 0; width: 100vw; max-height: 85vh; overflow-y: auto; background: #ffffff; border-radius: 20px 20px 0 0; padding: 18px; z-index: 101; display: none; }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="sidebar-brand">
-        <i class="fa-solid fa-scale-balanced"></i> District Court IT
-    </div>
-    <ul class="sidebar-menu">
-        <li class="sidebar-item active" id="navHome" onclick="goToHome()">
-            <div class="sidebar-item-content"><i class="fa-solid fa-chart-pie"></i> Dashboard Overview</div>
-        </li>
-        <li class="sidebar-item" onclick="toggleSubmenu('subCourts', this)">
-            <div class="sidebar-item-content"><i class="fa-solid fa-building-columns"></i> Court Establishment</div>
-            <i class="fa-solid fa-chevron-down chevron"></i>
-        </li>
-        <ul class="sidebar-submenu" id="subCourts">
-            <li class="submenu-item" onclick="goToHome()"><i class="fa-solid fa-layer-group"></i> All Establishments</li>
-            <li class="submenu-item" onclick="openMasterModal('Court')"><i class="fa-solid fa-circle-plus"></i> Add New Court</li>
-            <li class="submenu-item" onclick="openGroupManageModal()"><i class="fa-solid fa-tags"></i> Manage Complex Groups</li>
-        </ul>
-        <li class="sidebar-item" id="navReports" onclick="toggleSubmenu('subReports', this)">
-            <div class="sidebar-item-content"><i class="fa-solid fa-file-invoice"></i> Official Report Engine</div>
-            <i class="fa-solid fa-chevron-down chevron"></i>
-        </li>
-        <ul class="sidebar-submenu" id="subReports">
-            <li class="submenu-item" onclick="openSpecificReport('HC_MATRIX')"><i class="fa-solid fa-table-cells"></i> High Court Matrix</li>
-            <li class="submenu-item" onclick="openSpecificReport('DETAILED')"><i class="fa-solid fa-users"></i> Staff Asset Register</li>
-            <li class="submenu-item" onclick="openSpecificReport('DEFECTIVE')"><i class="fa-solid fa-wrench"></i> Complaints Statement</li>
-            <li class="submenu-item" onclick="openSpecificReport('EXPIRING_AMC')"><i class="fa-solid fa-clock-rotate-left"></i> AMC Expiry Forecast</li>
-            <li class="submenu-item" onclick="openSpecificReport('SPARE_STOCK')"><i class="fa-solid fa-boxes-stacked"></i> Spare Stock Register</li>
-        </ul>
-        <li class="sidebar-item" onclick="toggleSubmenu('subMasters', this)">
-            <div class="sidebar-item-content"><i class="fa-solid fa-sliders"></i> Master Registry</div>
-            <i class="fa-solid fa-chevron-down chevron"></i>
-        </li>
-        <ul class="sidebar-submenu" id="subMasters">
-            <li class="submenu-item" onclick="openMasterModal('Designation')"><i class="fa-solid fa-user-tie"></i> Designations / Seats</li>
-            <li class="submenu-item" onclick="openMasterModal('Make')"><i class="fa-solid fa-industry"></i> Hardware Brands</li>
-            <li class="submenu-item" onclick="openMasterModal('Model')"><i class="fa-solid fa-laptop"></i> Hardware Models</li>
-            <li class="submenu-item" onclick="openMasterModal('Serial')"><i class="fa-solid fa-barcode"></i> Serial Numbers Registry</li>
-        </ul>
-        <li class="sidebar-item" onclick="toggleSubmenu('subTools', this)">
-            <div class="sidebar-item-content"><i class="fa-solid fa-gears"></i> System Tools</div>
-            <i class="fa-solid fa-chevron-down chevron"></i>
-        </li>
-        <ul class="sidebar-submenu" id="subTools">
-            <li class="submenu-item" onclick="backupSystemData()"><i class="fa-solid fa-download"></i> Backup JSON File</li>
-            <li class="submenu-item" onclick="loadAllData()"><i class="fa-solid fa-rotate"></i> Sync Sheet Now</li>
-        </ul>
-    </ul>
-    <div class="sidebar-user-footer">
-        <div class="user-info">
-            <div class="user-avatar"><i class="fa-solid fa-user-shield"></i></div>
+    <!-- 📱 MAIN MOBILE CONTAINER -->
+    <div class="mobile-frame">
+        
+        <!-- Header -->
+        <div class="mobile-header">
+            <div>District Court IT Cell</div>
+            <div><span class="sync-dot sync-syncing" id="syncDot"></span></div>
         </div>
-        <button class="btn-logout" onclick="logoutSystem()" title="Logout of Session">
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span>Logout</span>
-        </button>
-    </div>
-</div>
 
-<div class="main-wrapper">
-    <div class="navbar">
-        <div class="navbar-title" id="pageHeaderTitle">District Court Kozhikode - Enterprise IT Cell</div>
-        <div id="connectionStatus" class="status-indicator status-syncing">
-            <span class="status-dot"></span> <span id="statusText">Connecting...</span>
+        <!-- Global Default Court selector -->
+        <div class="default-court-bar">
+            <span><i class="fa-solid fa-building-columns"></i> Default Court:</span>
+            <select id="globalDefaultCourtSelect" onchange="updateDefaultCourtSelection()"></select>
         </div>
-    </div>
-    <datalist id="listDesignations"></datalist>
-    <datalist id="listMakes"></datalist>
-    <datalist id="listModels"></datalist>
-    <datalist id="listSerials"></datalist>
-    <div class="container">
-        <div id="homeView" class="view-section active">
-            <div id="expiryAlertWidget" style="display:none; background: #fffbebf5; border: 1px solid #fcd34d; border-left: 5px solid var(--warning); padding: 14px 20px; border-radius: 12px; margin-bottom: 20px; justify-content: space-between; align-items: center;">
-                <div style="display:flex; align-items:center; gap: 12px;">
-                    <i class="fa-solid fa-bell-concierge" style="font-size: 1.4rem; color: var(--warning);"></i>
-                    <div>
-                        <strong style="font-size:0.9rem; color: #92400e;" id="expiryAlertTitle">AMC / Warranty Expiry Alert</strong>
-                        <p style="margin:2px 0 0 0; font-size:0.8rem; color:#b45309;" id="expiryAlertSub">Some devices require AMC renewal within 30 days.</p>
-                    </div>
-                </div>
-                <button class="btn btn-sm" style="background:#fef3c7; color:#92400e; border-color:#fde68a;" onclick="openSpecificReport('EXPIRING_AMC')"><i class="fa-solid fa-arrow-right"></i> Check Reports</button>
+
+        <!-- DATALISTS FOR AUTO-COMPLETION / SUGGESTIONS -->
+        <datalist id="listDesignations"></datalist>
+        <datalist id="listMakes"></datalist>
+        <datalist id="listModels"></datalist>
+        <datalist id="listSerials"></datalist>
+
+        <!-- 1. HOME VIEW (MATCHING IMAGE) -->
+        <div id="homeView" class="view-content active">
+            <div class="home-brand-box">
+                <i class="fa-solid fa-scale-balanced home-brand-icon"></i>
+                <div class="home-brand-title">District Court Kozhikode</div>
+                <div class="home-brand-sub">Mobile Asset Management System</div>
             </div>
-            <div class="metrics-grid">
-                <div class="metric-card"><i class="fa-solid fa-cubes"></i><div class="lbl">Total District Assets</div><div id="cntTotal" class="val">0</div></div>
-                <div class="metric-card"><i class="fa-solid fa-desktop"></i><div class="lbl">Active Workstations</div><div id="cntWork" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--success);"><i class="fa-solid fa-print" style="color:var(--success)"></i><div class="lbl">Printers & Scanners</div><div id="cntPeripherals" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--warning);"><i class="fa-solid fa-wrench" style="color:var(--warning)"></i><div class="lbl">Complaints / Defective</div><div id="cntDefective" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--danger);"><i class="fa-solid fa-dumpster" style="color:var(--danger)"></i><div class="lbl">E-Waste Register</div><div id="cntEwaste" class="val">0</div></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:15px;">
+
+            <div class="app-action-card" onclick="openView('addAssetView')">
+                <div class="icon-circle icon-blue"><i class="fa-solid fa-plus"></i></div>
                 <div>
-                    <h2 style="margin: 0; font-size: 1.3rem; font-weight: 800;">Court Establishment Complexes</h2>
-                    <p style="margin: 4px 0 0; color: var(--text-sub); font-size: 0.85rem;">Grouped view & Master Search across Kozhikode district.</p>
-                </div>
-                <div class="search-box" style="max-width: 400px; width:100%; border:2px solid var(--brand);">
-                    <i class="fa-solid fa-magnifying-glass" style="color: var(--brand);"></i>
-                    <input type="text" id="courtSearchInput" placeholder="🔍 Search Serial No, Court, Staff, Model..." onkeyup="debouncedCourtFilter()">
+                    <div class="card-text-title">Add Asset Entry</div>
+                    <div class="card-text-desc">Register new staff hardware allotting</div>
                 </div>
             </div>
-            <div id="courtsBentoContainer"></div>
-        </div>
-        <div id="courtDetailView" class="view-section">
-            <button class="btn" onclick="goToHome()" style="margin-bottom: 20px;"><i class="fa-solid fa-arrow-left"></i> Back to Jurisdiction Overview</button>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+
+            <div class="app-action-card" onclick="openView('manageAssetView')">
+                <div class="icon-circle icon-yellow"><i class="fa-solid fa-pen-to-square"></i></div>
                 <div>
-                    <h2 id="currentCourtName" style="margin: 0; font-size: 1.4rem; font-weight: 800;">Court Register</h2>
-                    <p style="margin: 4px 0 0; color: var(--text-sub); font-size: 0.85rem;">IT Inventory & Maintenance Records (Sorted Seat-wise)</p>
+                    <div class="card-text-title">Edit Asset Entry</div>
+                    <div class="card-text-desc">Search & modify existing device details</div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-success" onclick="exportToExcel('tableLiveAssets', 'Court_Register')"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
-                    <button class="btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / PDF</button>
-                    <button class="btn" onclick="loadAllData()"><i class="fa-solid fa-rotate"></i> Sync Data</button>
-                    <button class="btn btn-primary" onclick="openStaffManageModal()"><i class="fa-solid fa-user-plus"></i> Manage Staff Posts</button>
-                    <button class="btn btn-primary" onclick="openQRScanner()"><i class="fa-solid fa-qrcode"></i> Scan QR</button>
-                    <button class="btn" style="background:#059669; color:white; border-color:#059669;" onclick="openBulkCourtQRModal()"><i class="fa-solid fa-qrcode"></i> Print All QRs</button>
-                </div>
-            </div>
-            <div class="metrics-grid">
-                <div class="metric-card"><i class="fa-solid fa-microchip"></i><div class="lbl">Court Total Assets</div><div id="cMetricTotal" class="val">0</div></div>
-                <div class="metric-card"><i class="fa-solid fa-desktop"></i><div class="lbl">Active PCs</div><div id="cMetricPcs" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--warning);"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i><div class="lbl">Complaints / Defective</div><div id="cMetricDefective" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--danger);"><i class="fa-solid fa-recycle" style="color:var(--danger)"></i><div class="lbl">Moved to E-Waste</div><div id="cMetricEwaste" class="val">0</div></div>
-                <div class="metric-card" style="border-left: 4px solid var(--brand);"><i class="fa-solid fa-users" style="color:var(--brand)"></i><div class="lbl">Sanctioned Staff Strength</div><div id="cMetricStaff" class="val">0</div></div>
-            </div>
-            <div class="panel-box">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; gap: 15px; flex-wrap: wrap;">
-                    <div class="search-box" style="margin-bottom: 0; width: 100%; max-width: 320px;">
-                        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-sub);"></i>
-                        <input type="text" id="tableFilterInput" placeholder="Filter staff, serial, make..." onkeyup="debouncedTableFilter()">
-                    </div>
-                    <button class="btn btn-primary" onclick="openAssetModal()"><i class="fa-solid fa-plus"></i> Allocate Hardware to Staff</button>
-                </div>
-                <table id="tableLiveAssets">
-                    <thead>
-                        <tr>
-                            <th>Staff Name & Seat</th>
-                            <th>Hardware Make & Model</th>
-                            <th>Serial No (Click to Copy)</th>
-                            <th>Operational Status</th>
-                            <th>AMC / Warranty Coverage</th>
-                            <th>Installation / OM</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="liveTableBody">
-                        <tr><td colspan="7" style="text-align: center; padding: 25px;">Loading assets...</td></tr>
-                    </tbody>
-                </table>
             </div>
         </div>
-        <div id="reportsView" class="view-section">
-            <div class="panel-box no-print">
-                <h2 style="margin: 0 0 15px 0; font-size: 1.3rem; font-weight: 800;"><i class="fa-solid fa-file-invoice" style="color:var(--brand);"></i> Official Report Generator Engine</h2>
+
+        <!-- 2. ADD ASSET VIEW -->
+        <div id="addAssetView" class="view-content">
+            <div class="nav-back-btn" onclick="openView('homeView')"><i class="fa-solid fa-arrow-left"></i> Back to Home</div>
+            
+            <div class="form-card">
+                <div class="form-group">
+                    <label>Target Court Jurisdiction</label>
+                    <select id="addCourtSelect"></select>
+                </div>
                 <div class="grid-2">
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-gavel"></i> Select Target Jurisdiction / Complex Group</label>
-                        <select id="reportCourtSelect" onchange="generateSelectedReport()">
-                            <option value="ALL">-- All Courts (District Consolidated Overview) --</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fa-solid fa-list-check"></i> Select Official Report Format (10 Formats)</label>
-                        <select id="reportTypeSelect" onchange="generateSelectedReport()">
-                            <option value="HC_MATRIX">1. High Court Consolidated Hardware Matrix (e-Courts Format)</option>
-                            <option value="DETAILED">2. Full Staff Strength & Asset Allocation Register</option>
-                            <option value="DEFECTIVE">3. Defective Equipment & Pending Complaints Report</option>
-                            <option value="EWASTE">4. Condemned & E-Waste Disposal Summary</option>
-                            <option value="EXPIRING_AMC">5. 📅 AMC / Warranty Expiry Forecast (30-90 Days Expiry Alert)</option>
-                            <option value="SPARE_STOCK">6. 📦 Spare Stock & Unassigned / Idle Hardware Register</option>
-                            <option value="AGEING">7. ⏳ Legacy Hardware Ageing & Condemnation Proposal (5+ Years Old)</option>
-                            <option value="OM_WISE">8. 📄 OM (High Court Memorandum) Wise Supply Statement</option>
-                            <option value="MODEL_SUMMARY">9. 🖨️ Brand, Make & Model Distribution Breakdown Matrix</option>
-                            <option value="SEAT_AUDIT">10. 👤 Seat & Designation Hardware Allocation Audit Checklist</option>
-                            <option value="STAFF_GAP">11. 👥 Sanctioned Staff Strength vs Asset Allocation Report</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Staff Name *</label><input type="text" id="addStaff" placeholder="e.g. Midhun P"></div>
+                    <div class="form-group"><label>Seat / Designation *</label><input type="text" id="addDesig" list="listDesignations" placeholder="Select Designation..."></div>
                 </div>
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <button class="btn btn-primary" onclick="generateSelectedReport()"><i class="fa-solid fa-gears"></i> Generate Report</button>
-                    <button class="btn btn-success" onclick="exportToExcel('reportGeneratedTable', 'Official_Court_Report')"><i class="fa-solid fa-file-excel"></i> Export to Excel</button>
-                    <button class="btn" onclick="window.print()"><i class="fa-solid fa-print"></i> Print / Save as PDF</button>
+                <div class="grid-2">
+                    <div class="form-group"><label>Install Date</label><input type="date" id="addInstallDate"></div>
+                    <div class="form-group"><label>OM No.</label><input type="text" id="addOmNo" placeholder="OM/2026/102"></div>
                 </div>
             </div>
-            <div id="reportOutputContainer" class="panel-box" style="margin-top: 20px;">
-                <div style="text-align: center; color: var(--text-sub); padding: 40px;">Select parameters above and click "Generate Report".</div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong style="font-size:0.78rem; text-transform:uppercase; color:#2563eb;">Allocated Devices</strong>
+                <button class="btn btn-secondary" style="width:auto; padding:4px 10px; font-size:0.75rem;" onclick="addDeviceRow()"><i class="fa-solid fa-plus"></i> Add Device</button>
             </div>
+
+            <div id="devicesContainer"></div>
+
+            <button class="btn btn-primary" style="margin-top:10px;" onclick="saveMultiAssets()"><i class="fa-solid fa-floppy-disk"></i> Save Asset</button>
         </div>
-    </div>
-</div>
 
-<div class="modal-overlay" id="modalOverlay"></div>
+        <!-- 3. EDIT / MANAGE ASSET VIEW -->
+        <div id="manageAssetView" class="view-content">
+            <div class="nav-back-btn" onclick="openView('homeView')"><i class="fa-solid fa-arrow-left"></i> Back to Home</div>
 
-<div class="modal-box" id="assetModal">
-    <h3 id="assetModalTitle" style="margin-top: 0; color: var(--brand-dark); font-weight:800;">Hardware Allotment Form</h3>
-    <div class="grid-2">
-        <div class="form-group"><label>Staff Name *</label><input type="text" id="inputStaff" placeholder="e.g. Midhun P"></div>
-        <div class="form-group"><label>Designation / Seat *</label><input type="text" id="inputDesig" list="listDesignations" placeholder="Select Designation..." oninput="handleSmartSearch(this, 'listDesignations', masterDataStore.designations)"></div>
+            <div class="form-card">
+                <div class="form-group" style="margin:0;">
+                    <label>Select Court Jurisdiction</label>
+                    <select id="manageCourtSelect" onchange="renderSeatWiseAssets()"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="text" id="mobileSearchInput" placeholder="🔍 Search Staff, Seat, Serial, Model..." onkeyup="renderSeatWiseAssets()">
+            </div>
+
+            <div id="seatWiseAssetsContainer"></div>
+        </div>
+
     </div>
-    <div class="grid-2">
-        <div class="form-group"><label>Installation Date</label><input type="date" id="inputInstallDate"></div>
-        <div class="form-group"><label>High Court OM No.</label><input type="text" id="inputOmNo" placeholder="e.g. HC/OM/2026/102"></div>
-    </div>
-    <div style="background:#f1f5f9; padding:14px; border-radius:12px; margin: 12px 0; border: 1px solid var(--border);">
-        <span style="font-size:0.75rem; font-weight:800; color:var(--brand-dark); text-transform:uppercase; display:block; margin-bottom:10px;">Warranty / AMC Dates (Optional)</span>
+
+    <!-- EDIT ASSET MODAL POPUP -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-box" id="editAssetModal">
+        <h4 style="margin-top:0; color:#003366;">Edit Asset Details</h4>
+        <input type="hidden" id="editOldSerial">
+
         <div class="grid-2">
-            <div class="form-group"><label>Warranty Start</label><input type="date" id="inputWStart"></div>
-            <div class="form-group"><label>Warranty End</label><input type="date" id="inputWEnd"></div>
+            <div class="form-group"><label>Staff Name</label><input type="text" id="editStaff"></div>
+            <div class="form-group"><label>Designation</label><input type="text" id="editDesig" list="listDesignations"></div>
         </div>
         <div class="grid-2">
-            <div class="form-group"><label>AMC Start</label><input type="date" id="inputAmcStart"></div>
-            <div class="form-group"><label>AMC End</label><input type="date" id="inputAmcEnd"></div>
+            <div class="form-group"><label>Make / Brand</label><input type="text" id="editMake" list="listMakes"></div>
+            <div class="form-group"><label>Model Name</label><input type="text" id="editModel" list="listModels"></div>
         </div>
-    </div>
-    <hr style="border:0; border-top:1px dashed var(--border); margin: 15px 0;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-        <h4 style="margin:0; font-size:0.85rem; text-transform:uppercase; color:var(--brand); font-weight:800;">Devices List for this Seat</h4>
-        <button type="button" class="btn" style="padding:6px 12px; font-size:0.78rem;" onclick="addDeviceRow()"><i class="fa-solid fa-plus"></i> Add Another Device</button>
-    </div>
-    <div id="devicesContainer"></div>
-    <div style="display: flex; gap: 12px; margin-top: 22px;">
-        <button class="btn" style="flex: 1; justify-content: center;" onclick="closeModals()">Cancel</button>
-        <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="saveMultiAssetEntry()">Save All Allocated Items</button>
-    </div>
-</div>
-
-<div class="modal-box" id="editAssetModal">
-    <h3 style="margin-top: 0; color: var(--brand-dark); font-weight: 800;">Edit Asset Details</h3>
-    <input type="hidden" id="editOldSerial">
-    <div class="grid-2">
-        <div class="form-group"><label>Staff Name</label><input type="text" id="editStaff"></div>
-        <div class="form-group"><label>Designation</label><input type="text" id="editDesig" list="listDesignations" oninput="handleSmartSearch(this, 'listDesignations', masterDataStore.designations)"></div>
-    </div>
-    <div class="grid-2">
-        <div class="form-group"><label>Make / Brand</label><input type="text" id="editMake" list="listMakes" oninput="handleSmartSearch(this, 'listMakes', masterDataStore.makes)"></div>
-        <div class="form-group"><label>Model Name</label><input type="text" id="editModel" list="listModels" oninput="handleSmartSearch(this, 'listModels', masterDataStore.models)"></div>
-    </div>
-    <div class="grid-2">
-        <div class="form-group"><label>Serial Number (Unique)</label><input type="text" id="editSerial" style="font-family: monospace; font-weight: bold;" oninput="validateSerialInput(this, true, document.getElementById('editOldSerial').value); handleSmartSearch(this, 'listSerials', masterDataStore.serials);"></div>
         <div class="form-group">
-            <label>Operational Status *</label>
+            <label>Serial Number (Unique)</label>
+            <input type="text" id="editSerial" list="listSerials" style="font-family:monospace; font-weight:bold;">
+        </div>
+        <div class="form-group">
+            <label>Operational Status</label>
             <select id="editStatus">
                 <option value="Active">Active / Working</option>
-                <option value="Defective">Defective / Complaint / Under Repair</option>
+                <option value="Defective">Defective / Complaint</option>
                 <option value="Not Allotted">Not Allotted / Spare Stock</option>
                 <option value="Not in Use">Not in Use / Idle</option>
-                <option value="Moved to E-Waste">Condemned (Move to E-Waste)</option>
+                <option value="Moved to E-Waste">Condemned (E-Waste)</option>
             </select>
         </div>
-    </div>
-    <div class="grid-2" style="margin-top: 10px; background: #eff6ff; padding: 12px; border-radius: 10px; border: 1px solid #bfdbfe;">
-        <div class="form-group" style="margin: 0; grid-column: span 2;">
-            <label style="color: var(--brand-dark);"><i class="fa-solid fa-right-left"></i> Transfer Asset to Another Court (Optional)</label>
-            <select id="editTransferCourt" onchange="toggleTransferFields(this.value)"></select>
-        </div>
-    </div>
-    <div id="transferNewDetailsSection" style="display: none; background: #f0fdf4; padding: 12px; border-radius: 10px; border: 1px solid #bbf7d0; margin-top: 10px;">
-        <span style="font-size:0.75rem; font-weight:800; color:#166534; text-transform:uppercase; display:block; margin-bottom:8px;">
-            <i class="fa-solid fa-user-plus"></i> New Allotment Details (Target Court)
-        </span>
         <div class="grid-2">
-            <div class="form-group" style="margin-bottom:8px;">
-                <label style="color:#166534;">New Staff Name</label><input type="text" id="transferNewStaff" placeholder="e.g. Rahul V">
-            </div>
-            <div class="form-group" style="margin-bottom:8px;">
-                <label style="color:#166534;">New Designation / Seat</label><input type="text" id="transferNewDesig" list="listDesignations" placeholder="Select Seat..." oninput="handleSmartSearch(this, 'listDesignations', masterDataStore.designations)">
-            </div>
+            <div class="form-group"><label>Install Date</label><input type="date" id="editInstallDate"></div>
+            <div class="form-group"><label>OM No.</label><input type="text" id="editOmNo"></div>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:10px;">
+            <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveEditAsset()">Update Asset</button>
         </div>
     </div>
-    <div class="grid-2" style="margin-top:10px;">
-        <div class="form-group"><label>Installation Date</label><input type="date" id="editInstallDate"></div>
-        <div class="form-group"><label>High Court OM No.</label><input type="text" id="editOmNo"></div>
-    </div>
-    <div style="background:#f1f5f9; padding:14px; border-radius:12px; margin: 12px 0; border: 1px solid var(--border);">
-        <span style="font-size:0.75rem; font-weight:800; color:var(--brand-dark); text-transform:uppercase; display:block; margin-bottom:10px;">Warranty / AMC Dates (Optional)</span>
-        <div class="grid-2">
-            <div class="form-group"><label>Warranty Start</label><input type="date" id="editWStart"></div>
-            <div class="form-group"><label>Warranty End</label><input type="date" id="editWEnd"></div>
-        </div>
-        <div class="grid-2">
-            <div class="form-group"><label>AMC Start</label><input type="date" id="editAmcStart"></div>
-            <div class="form-group"><label>AMC End</label><input type="date" id="editAmcEnd"></div>
-        </div>
-    </div>
-    <div style="display: flex; gap: 12px; margin-top: 22px;">
-        <button type="button" class="btn btn-danger" onclick="deleteCurrentAsset()">Delete Asset</button>
-        <button class="btn" style="flex: 1; justify-content: center;" onclick="closeModals()">Cancel</button>
-        <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="saveEdit()">Update Asset Data</button>
-    </div>
-</div>
 
-<div class="modal-box" id="masterModal">
-    <h3 id="masterModalTitle" style="margin-top: 0; font-weight: 800;"><i class="fa-solid fa-sliders" style="color:var(--brand);"></i> Master Configuration</h3>
-    <input type="hidden" id="masterCategory">
-    <div id="fieldMasterValue">
-        <div class="form-group">
-            <label id="lblMasterInput">Value / Item Name</label>
-            <textarea id="masterValue" rows="6" placeholder="Enter single value or PASTE MULTIPLE LINES from Excel..."></textarea>
-            <small style="color: var(--text-sub); display: block; margin-top: 4px;">💡 Tip: You can copy a column from Excel and paste it directly above to add multiple items at once!</small>
-        </div>
-    </div>
-    <div id="fieldsNewCourt" style="display: none; background:#f1f5f9; padding:14px; border-radius:12px; margin-bottom:14px; border: 1px solid var(--border);">
-        <div class="form-group"><label>Court ID (Unique Code, No Spaces) *</label><input type="text" id="courtIdInput" placeholder="e.g. Subcourt1, Munsiff1"></div>
-        <div class="form-group"><label>Full Court Name *</label><input type="text" id="courtNameInput" placeholder="e.g. Sub Court - I, Kozhikode"></div>
-        <div class="form-group"><label>Court Description</label><input type="text" id="courtDescInput" placeholder="e.g. Subordinate Division"></div>
-        <div class="form-group"><label>Complex Group Tag (Optional)</label><input type="text" id="courtGroupInput" placeholder="e.g. Sub Court Complex"></div>
-    </div>
-    <div style="display: flex; gap: 12px; margin-top: 22px;">
-        <button class="btn" style="flex: 1; justify-content: center;" onclick="closeModals()">Cancel</button>
-        <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="saveMasterEntry()">Save Entry / Bulk Import</button>
-    </div>
-</div>
-
-<div class="modal-box" id="groupManageModal">
-    <h3 style="margin-top: 0; font-weight: 800;"><i class="fa-solid fa-layer-group" style="color:var(--brand);"></i> Assign Complex Groups to Courts</h3>
-    <p style="font-size:0.8rem; color:var(--text-sub);">Assign courts to group complexes for combined multi-court reports.</p>
-    <div id="courtGroupListContainer" style="max-height: 350px; overflow-y: auto; margin-bottom: 20px;"></div>
-    <div style="display: flex; gap: 12px; margin-top: 15px;">
-        <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="closeModals()">Done</button>
-    </div>
-</div>
-
-<div class="modal-box" id="staffManageModal">
-    <h3 style="margin-top: 0; color: var(--brand-dark); font-weight:800;">
-        <i class="fa-solid fa-users-gear" style="color:var(--brand);"></i> Court Staff Strength Management
-    </h3>
-    <p style="font-size:0.8rem; color:var(--text-sub);">ഈ കോർട്ടിലെ അനുവദിക്കപ്പെട്ട തസ്തികകളുടെ (Sanctioned Posts) വിവരങ്ങൾ എൻട്രി ചെയ്യുക. (eg: Judge - 3, JS - 2).</p>
-    <div id="staffPostsContainer"></div>
-    <button type="button" class="btn btn-sm" onclick="addStaffPostRow()" style="margin-bottom:15px;"><i class="fa-solid fa-plus"></i> Add Designation Row</button>
-    <div style="display: flex; gap: 12px; margin-top: 15px;">
-        <button class="btn" style="flex: 1; justify-content: center;" onclick="closeModals()">Cancel</button>
-        <button class="btn btn-primary" style="flex: 1; justify-content: center;" onclick="saveStaffStrengthData()">Save Staff Strength</button>
-    </div>
-</div>
-
-<div class="modal-box" id="qrModal" style="max-width: 380px; text-align: center;">
-    <h3 style="margin-top:0; color:var(--brand-dark);">Asset QR Code Label</h3>
-    <div id="qrPrintArea" style="background:#fff; border:2px dashed #000; padding:15px; border-radius:12px; margin:15px 0;">
-        <h4 style="margin:0 0 5px 0; font-size:0.9rem; text-transform:uppercase;" id="qrCourtLabel">District Court Kozhikode</h4>
-        <div id="qrcodeCanvas" style="display:flex; justify-content:center; margin:10px 0;"></div>
-        <div style="font-family:monospace; font-weight:800; font-size:1rem; color:#000;" id="qrSerialLabel">SN: 123456</div>
-        <div style="font-size:0.75rem; color:#475569; margin-top:4px;" id="qrDetailLabel">Desktop - Acer Veriton</div>
-    </div>
-    <div style="display:flex; gap:10px;">
-        <button class="btn" style="flex:1;" onclick="closeModals()">Close</button>
-        <button class="btn btn-success" style="flex:1;" onclick="printQRSticker()"><i class="fa-solid fa-print"></i> Print Label</button>
-    </div>
-</div>
-
-<div class="modal-box" id="bulkQrModal" style="max-width: 900px; width: 95%;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:2px solid var(--border); padding-bottom:10px;">
-        <h3 style="margin:0; color:var(--brand-dark);"><i class="fa-solid fa-qrcode"></i> Bulk Asset QR Stickers Sheet</h3>
-        <div style="display:flex; gap:10px;">
-            <button class="btn btn-success" onclick="printBulkQRSheet()"><i class="fa-solid fa-print"></i> Print A4 Grid Sheet</button>
-            <button class="btn" onclick="closeModals()">Close</button>
-        </div>
-    </div>
-    <div id="bulkQrContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; max-height: 65vh; overflow-y: auto; padding: 10px; background: #f8fafc; border-radius: 12px;"></div>
-</div>
-
-<div class="modal-box" id="qrScannerModal" style="max-width: 450px;">
-    <h3 style="margin-top:0; color:var(--brand-dark); text-align:center;"><i class="fa-solid fa-camera"></i> Scan Asset QR Code</h3>
-    <div id="qrReader" style="width:100%; border-radius:12px; overflow:hidden;"></div>
-    <button class="btn btn-danger" style="width:100%; margin-top:15px; justify-content:center;" onclick="closeQRScanner()">Stop Camera</button>
-</div>
-
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-card">
-        <div class="login-header">
-            <div class="login-icon-badge"><i class="fa-solid fa-shield-halved"></i></div>
-            <h2>IT Management V.2.0</h2>
-            <p>District Court Kozhikode</p>
-        </div>
-        <div id="loginErrorMsg" class="login-error-msg">
-            <i class="fa-solid fa-circle-exclamation"></i>
-            <span id="loginErrorText">Invalid Username or Password!</span>
-        </div>
-        <!-- Note: This is a frontend mock authentication logic. True authentication requires a backend system. -->
-        <form onsubmit="handleLogin(event)" autocomplete="off">
-            <div class="form-group-login">
-                <label for="loginUsername">Username</label>
-                <div class="input-icon-wrapper">
-                    <i class="fa-solid fa-user"></i>
-                    <input type="text" id="loginUsername" placeholder="Enter username" autocomplete="off" required>
-                </div>
-            </div>
-            <div class="form-group-login">
-                <label for="loginPassword">Password</label>
-                <div class="input-icon-wrapper">
-                    <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="new-password" required>
-                </div>
-            </div>
-            <button type="submit" id="btnLoginSubmit" class="btn-login-submit">
-                <span>Sign In to Dashboard</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
-        </form>
-        <div class="login-footer"><i class="fa-solid fa-lock"></i> Secure Enterprise Session </div>
-    </div>
-</div>
-
-<script>
-    const apiURL = 'https://script.google.com/macros/s/AKfycbzAgmvDfO_qJDRWkWf1YzRtiMkEz7jqHHgJ5ZrOzJnOMNeGcV8PTzBCSpXL0KpNEE0e/exec';
-    
-    const defaultCourts = [
-        { id: 'Jfcm1', name: 'JFCM Court - I, Kozhikode', desc: 'Judicial First Class Magistrate Court 1', group: '' },
-        { id: 'Jfcm6', name: 'JFCM Court - VI, Kozhikode', desc: 'Judicial First Class Magistrate Court 6', group: '' },
-        { id: 'Adc', name: 'Additional District Court', desc: 'ADC & Sessions Court', group: '' },
-        { id: 'Subcourt', name: 'Sub Court, Kozhikode', desc: 'Subordinate Judge Court', group: '' }
-    ];
-
-    let courtsList = [...defaultCourts];
-    let currentCourt = '';
-    let globalStore = {};
-    let serialHashMap = new Map();
-    let masterDataStore = { designations: [], makes: [], models: [], serials: [] };
-    let html5QrcodeScanner = null;
-
-    // Helper functions
-    function parseFlexibleDate(dateStr) {
-        if (!dateStr || dateStr === '-' || dateStr === '' || dateStr === 'null') return null;
-        if (dateStr instanceof Date) return isNaN(dateStr.getTime()) ? null : dateStr;
-        let str = String(dateStr).trim();
-        if (/^\d{4}-\d{2}-\d{2}/.test(str)) {
-            let d = new Date(str);
-            return isNaN(d.getTime()) ? null : d;
-        }
-        let parts = str.split(/[-/]/);
-        if (parts.length === 3) {
-            let p1 = parseInt(parts[0], 10);
-            let p2 = parseInt(parts[1], 10);
-            let p3 = parseInt(parts[2], 10);
-            if (p3 > 1000) {
-                let d = new Date(p3, p2 - 1, p1);
-                return isNaN(d.getTime()) ? null : d;
-            } else if (p1 > 1000) {
-                let d = new Date(p1, p2 - 1, p3);
-                return isNaN(d.getTime()) ? null : d;
-            }
-        }
-        let fallbackDate = new Date(str);
-        return isNaN(fallbackDate.getTime()) ? null : fallbackDate;
-    }
-
-    function formatDateForDisplay(dateStr) {
-        let dt = parseFlexibleDate(dateStr);
-        if (!dt) return '-';
-        let day = String(dt.getDate()).padStart(2, '0');
-        let month = String(dt.getMonth() + 1).padStart(2, '0');
-        let year = dt.getFullYear();
-        return `${day}-${month}-${year}`;
-    }
-
-    function formatDateForPicker(dStr) {
-        let dt = parseFlexibleDate(dStr);
-        if(!dt) return '';
-        return dt.toISOString().split('T')[0];
-    }
-
-    function escapeHTML(str) {
-        return String(str || '').replace(/[&<>"']/g, function(m) {
-            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-        });
-    }
-
-    function debounce(func, delay = 200) {
-        let timer;
-        return function(...args) {
-            clearTimeout(timer);
-            timer = setTimeout(() => func.apply(this, args), delay);
-        };
-    }
-    const debouncedCourtFilter = debounce(() => filterCourts(), 200);
-    const debouncedTableFilter = debounce(() => applyTableFilter(), 200);
-
-    // Deduped QR Coverage Logic Helper
-    function getQRCoverageStatus(wEndStr, amcEndStr) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const parsedWEnd = parseFlexibleDate(wEndStr);
-        const parsedAmcEnd = parseFlexibleDate(amcEndStr);
+    <script>
+        const apiURL = 'https://script.google.com/macros/s/AKfycbzAgmvDfO_qJDRWkWf1YzRtiMkEz7jqHHgJ5ZrOzJnOMNeGcV8PTzBCSpXL0KpNEE0e/exec';
         
-        if (parsedAmcEnd && parsedAmcEnd >= today) return "AMC ACTIVE";
-        if (parsedWEnd && parsedWEnd >= today) return "WARRANTY ACTIVE";
-        if ((parsedWEnd && parsedWEnd < today) || (parsedAmcEnd && parsedAmcEnd < today)) return "EXPIRED";
-        return "No Coverage";
-    }
-
-    // Consolidated closeModals function
-    function closeModals() {
-        const modalIds = [
-            'modalOverlay', 'assetModal', 'editAssetModal', 'masterModal', 
-            'groupManageModal', 'staffManageModal', 'qrModal', 'bulkQrModal', 'qrScannerModal'
+        const defaultCourts = [
+            { id: 'Jfcm1', name: 'JFCM Court - I, Kozhikode' },
+            { id: 'Jfcm6', name: 'JFCM Court - VI, Kozhikode' },
+            { id: 'Adc', name: 'Additional District Court' },
+            { id: 'Subcourt', name: 'Sub Court, Kozhikode' }
         ];
-        modalIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.style.display = 'none';
-        });
-        closeQRScanner();
-    }
 
-    // Core Initialization
-    function handleLogin(e) {
-        if (e) e.preventDefault();
-        const user = document.getElementById('loginUsername').value.trim();
-        const pass = document.getElementById('loginPassword').value.trim();
-        const errorBox = document.getElementById('loginErrorMsg');
-        const errorText = document.getElementById('loginErrorText');
-        const btnSubmit = document.getElementById('btnLoginSubmit');
+        let courtsList = [...defaultCourts];
+        let globalStore = {};
+        let masterDataStore = { designations: [], makes: [], models: [], serials: [] };
+        let defaultSelectedCourt = '';
 
-        btnSubmit.disabled = true;
-        btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...`;
-
-        setTimeout(() => {
-            if (user === 'admin' && pass === '1234') {
-                sessionStorage.setItem('isLoggedIn', 'true');
-                document.getElementById('loginOverlay').style.display = 'none';
-                errorBox.style.display = 'none';
-                loadAllData();
-            } else {
-                errorText.innerText = 'Invalid username or password!';
-                errorBox.style.display = 'flex';
-                document.getElementById('loginPassword').value = '';
-                document.getElementById('loginPassword').focus();
-            }
-            btnSubmit.disabled = false;
-            btnSubmit.innerHTML = `<span>Sign In to Dashboard</span><i class="fa-solid fa-arrow-right"></i>`;
-        }, 400);
-    }
-
-    function logoutSystem() {
-        Swal.fire({
-            title: 'Logout Session?', text: "Are you sure you want to end your current session?",
-            icon: 'question', showCancelButton: true, confirmButtonColor: '#2563eb',
-            cancelButtonColor: '#64748b', confirmButtonText: 'Yes, Logout'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                sessionStorage.removeItem('isLoggedIn');
-                location.reload();
-            }
-        });
-    }
-
-    window.onload = function() {
-        loadLocalCache();
-        renderCourtCards(courtsList);
-        populateReportCourtDropdown();
-        if (window.location.hash) handleHashRouting();
-
-        if (sessionStorage.getItem('isLoggedIn') === 'true') {
-            document.getElementById('loginOverlay').style.display = 'none';
+        window.onload = function() {
+            loadLocalCache();
+            populateCourtDropdowns();
             loadAllData();
-        } else {
-            document.getElementById('loginOverlay').style.display = 'flex';
+        };
+
+        function openView(viewId) {
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+
+            if(viewId === 'addAssetView') {
+                if(document.getElementById('devicesContainer').children.length === 0) addDeviceRow();
+                document.getElementById('addCourtSelect').value = defaultSelectedCourt;
+            }
+            if(viewId === 'manageAssetView') {
+                document.getElementById('manageCourtSelect').value = defaultSelectedCourt;
+                renderSeatWiseAssets();
+            }
         }
-    };
 
-    window.addEventListener('online', () => { 
-        updateConnectionStatus('connected', 'Connected'); 
-        if(sessionStorage.getItem('isLoggedIn') === 'true') loadAllData(); 
-    });
-    window.addEventListener('offline', () => { updateConnectionStatus('offline', 'Network Lost! Sync Paused'); });
-    window.onhashchange = function() { handleHashRouting(); };
-
-    function handleHashRouting() {
-        const hash = window.location.hash.replace('#', '');
-        if (hash.startsWith('court=')) {
-            const cId = hash.replace('court=', '');
-            const found = courtsList.find(c => c.id === cId);
-            if (found) openCourt(found.id, found.name, false);
-        } else if (hash.startsWith('report=')) {
-            const repType = hash.replace('report=', '');
-            openSpecificReport(repType, false);
-        } else {
-            goToHome(false);
-        }
-    }
-
-    function loadLocalCache() {
-        try {
-            const cachedData = localStorage.getItem('dc_it_cache_data');
-            if (cachedData) {
-                const parsed = JSON.parse(cachedData);
-                if (parsed.courtsList && parsed.globalStore) {
-                    courtsList = parsed.courtsList;
-                    globalStore = parsed.globalStore;
+        function loadLocalCache() {
+            try {
+                const cached = localStorage.getItem('dc_it_cache_data');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    courtsList = parsed.courtsList || defaultCourts;
+                    globalStore = parsed.globalStore || {};
                     masterDataStore = parsed.masterDataStore || masterDataStore;
-                    refreshSystemState();
+                    populateDatalists();
                 }
-            }
-        } catch(e) {}
-    }
-
-    function saveLocalCache() {
-        try { localStorage.setItem('dc_it_cache_data', JSON.stringify({ courtsList, globalStore, masterDataStore })); } catch(e){}
-    }
-
-    function refreshSystemState() {
-        rebuildSerialHashMap();
-        renderCourtCards(courtsList);
-        populateReportCourtDropdown();
-        calculateHomeStats();
-        checkExpiringWarranties();
-        saveLocalCache();
-    }
-
-    function rebuildSerialHashMap() {
-        serialHashMap.clear();
-        Object.keys(globalStore).forEach(cId => {
-            const assets = globalStore[cId].assets || [];
-            const ewaste = globalStore[cId].ewaste || [];
-            assets.forEach(a => { if(a[3]) serialHashMap.set(String(a[3]).toUpperCase().trim(), cId); });
-            ewaste.forEach(e => { if(e[2]) serialHashMap.set(String(e[2]).toUpperCase().trim(), cId); });
-        });
-    }
-
-    function updateConnectionStatus(status, text) {
-        const badge = document.getElementById('connectionStatus');
-        const txt = document.getElementById('statusText');
-        if(!badge || !txt) return;
-        badge.className = 'status-indicator status-' + status;
-        txt.innerText = text;
-    }
-
-    function jsonpFetch(url) {
-        return new Promise((resolve) => {
-            const callbackName = 'jp_cb_' + Math.round(100000 * Math.random());
-            window[callbackName] = function(data) {
-                delete window[callbackName];
-                const scriptEl = document.getElementById(callbackName);
-                if(scriptEl) document.body.removeChild(scriptEl);
-                resolve(data);
-            };
-            const script = document.createElement('script');
-            script.id = callbackName;
-            script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
-            script.onerror = function() {
-                delete window[callbackName];
-                const scriptEl = document.getElementById(callbackName);
-                if(scriptEl) document.body.removeChild(scriptEl);
-                resolve(null);
-            };
-            document.body.appendChild(script);
-        });
-    }
-
-    function postToScript(payload) {
-        fetch(apiURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payload)
-        }).catch(err => console.error("Sync error:", err));
-    }
-
-    async function loadAllData() {
-        if (!navigator.onLine) {
-            updateConnectionStatus('offline', 'Offline Mode (Showing Cached Data)');
-            return;
+                const savedDefCourt = localStorage.getItem('default_court_pref');
+                if(savedDefCourt) defaultSelectedCourt = savedDefCourt;
+            } catch(e){}
         }
-        updateConnectionStatus('syncing', 'Syncing Sheet...');
-        try {
-            const data = await jsonpFetch(`${apiURL}?action=getAllData`);
-            if(data && data.courtsData) {
-                courtsList = data.courtsList && data.courtsList.length > 0 ? data.courtsList : defaultCourts;
-                globalStore = data.courtsData || {};
-                
-                if(data.master) {
-                    masterDataStore.designations = data.master.designations || [];
-                    masterDataStore.makes = data.master.makes || [];
-                    masterDataStore.models = data.master.models || [];
-                    masterDataStore.serials = data.master.serials || [];
-                    populateDatalist('listDesignations', masterDataStore.designations);
-                    populateDatalist('listMakes', masterDataStore.makes);
-                    populateDatalist('listModels', masterDataStore.models);
-                    populateDatalist('listSerials', masterDataStore.serials);
-                }
-                refreshSystemState();
-                if(currentCourt) renderCourtTables();
-                updateConnectionStatus('connected', 'Connected');
-            } else {
-                updateConnectionStatus('offline', 'Sheet Connection Failed');
-            }
-        } catch(e) {
-            updateConnectionStatus('offline', 'Offline / Connection Failed');
-        }
-    }
 
-    // UI and Logic 
-    function toggleSubmenu(menuId, el) {
-        const submenu = document.getElementById(menuId);
-        const isOpen = submenu.classList.contains('open');
-        document.querySelectorAll('.sidebar-submenu').forEach(s => s.classList.remove('open'));
-        document.querySelectorAll('.sidebar-item').forEach(i => {
-            i.classList.remove('open');
-            if(i !== el && i.id !== 'navHome') i.classList.remove('active');
-        });
-        if (!isOpen) {
-            submenu.classList.add('open');
-            if (el) { el.classList.add('open'); el.classList.add('active'); }
+        function populateDatalists() {
+            populateSingleDatalist('listDesignations', masterDataStore.designations);
+            populateSingleDatalist('listMakes', masterDataStore.makes);
+            populateSingleDatalist('listModels', masterDataStore.models);
+            populateSingleDatalist('listSerials', masterDataStore.serials);
         }
-    }
 
-    function handleSmartSearch(inputEl, datalistId, fullSourceArray) {
-        const query = inputEl.value.trim().toLowerCase();
-        if(!fullSourceArray || fullSourceArray.length === 0) return;
-        if (query.length === 0) {
-            populateDatalist(datalistId, fullSourceArray.slice(0, 20));
-            return;
+        function populateSingleDatalist(elementId, items) {
+            const dl = document.getElementById(elementId);
+            if(!dl) return;
+            dl.innerHTML = '';
+            (items || []).forEach(i => { dl.innerHTML += `<option value="${escapeHTML(i)}">`; });
         }
-        if (query.length < 2) return;
-        let filtered = [];
-        for (let i = 0; i < fullSourceArray.length; i++) {
-            if (String(fullSourceArray[i]).toLowerCase().includes(query)) {
-                filtered.push(fullSourceArray[i]);
-                if (filtered.length >= 20) break;
-            }
-        }
-        populateDatalist(datalistId, filtered);
-    }
 
-    function populateDatalist(elementId, items) {
-        const dl = document.getElementById(elementId);
-        if(!dl) return;
-        dl.innerHTML = '';
-        (items || []).forEach(item => { dl.innerHTML += `<option value="${escapeHTML(item)}">`; });
-    }
-
-    function calculateHomeStats() {
-        let total = 0, pcs = 0, peripherals = 0, defective = 0, ewaste = 0;
-        Object.keys(globalStore).forEach(cId => {
-            const assets = globalStore[cId].assets || [];
-            const ew = globalStore[cId].ewaste || [];
-            assets.forEach(a => {
-                const status = String(a[5]||'Active').toLowerCase();
-                const makeMod = `${a[2]||''} ${a[4]||''}`.toLowerCase();
-                if(status.includes('ewaste') || status.includes('condemned')) {
-                    ewaste++;
-                } else {
-                    total++;
-                    if(makeMod.includes('pc') || makeMod.includes('desktop') || makeMod.includes('veriton') || makeMod.includes('aio')) pcs++;
-                    if(makeMod.includes('printer') || makeMod.includes('scanner') || makeMod.includes('mfd') || makeMod.includes('epson')) peripherals++;
-                    if(status.includes('defective') || status.includes('complaint')) defective++;
-                }
+        function jsonpFetch(url) {
+            return new Promise((resolve) => {
+                const callbackName = 'jp_cb_' + Math.round(100000 * Math.random());
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    if(document.getElementById(callbackName)) document.body.removeChild(document.getElementById(callbackName));
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.id = callbackName;
+                script.src = url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+                script.onerror = function() { resolve(null); };
+                document.body.appendChild(script);
             });
-            ewaste += ew.length;
-        });
-        document.getElementById('cntTotal').innerText = total;
-        document.getElementById('cntWork').innerText = pcs;
-        document.getElementById('cntPeripherals').innerText = peripherals;
-        document.getElementById('cntDefective').innerText = defective;
-        document.getElementById('cntEwaste').innerText = ewaste;
-    }
+        }
 
-    function checkExpiringWarranties() {
-        const alertWidget = document.getElementById('expiryAlertWidget');
-        const alertSub = document.getElementById('expiryAlertSub');
-        let expiringCount = 0;
-        const today = new Date();
-        today.setHours(0,0,0,0);
-
-        Object.keys(globalStore).forEach(cId => {
-            const assets = globalStore[cId].assets || [];
-            assets.forEach(a => {
-                const wEnd = a[9];
-                const amcEnd = a[11];
-                let targetDate = parseFlexibleDate(amcEnd) || parseFlexibleDate(wEnd);
-                if (targetDate) {
-                    const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-                    if (diffDays >= 0 && diffDays <= 30) {
-                        expiringCount++;
+        async function loadAllData() {
+            document.getElementById('syncDot').className = 'sync-dot sync-syncing';
+            try {
+                const data = await jsonpFetch(`${apiURL}?action=getAllData`);
+                if(data && data.courtsData) {
+                    courtsList = data.courtsList && data.courtsList.length > 0 ? data.courtsList : defaultCourts;
+                    globalStore = data.courtsData || {};
+                    
+                    if(data.master) {
+                        masterDataStore.designations = data.master.designations || [];
+                        masterDataStore.makes = data.master.makes || [];
+                        masterDataStore.models = data.master.models || [];
+                        masterDataStore.serials = data.master.serials || [];
+                        populateDatalists();
                     }
-                }
-            });
-        });
 
-        if (expiringCount > 0) {
-            alertSub.innerText = `Attention: ${expiringCount} device(s) have AMC/Warranty expiring in the next 30 days!`;
-            alertWidget.style.display = 'flex';
-        } else {
-            alertWidget.style.display = 'none';
+                    populateCourtDropdowns();
+                    if(document.getElementById('manageAssetView').classList.contains('active')) renderSeatWiseAssets();
+                    
+                    document.getElementById('syncDot').className = 'sync-dot sync-online';
+                } else {
+                    document.getElementById('syncDot').className = 'sync-dot sync-offline';
+                }
+            } catch(e) { document.getElementById('syncDot').className = 'sync-dot sync-offline'; }
         }
-    }
 
-    function renderCourtCards(list, searchQuery = '') {
-        const container = document.getElementById('courtsBentoContainer');
-        const query = searchQuery.trim().toLowerCase();
-        let groupsMap = {};
-        list.forEach(c => {
-            const gKey = c.group && c.group.trim() !== '' ? c.group.trim() : 'Standalone Courts';
-            if(!groupsMap[gKey]) groupsMap[gKey] = [];
-            groupsMap[gKey].push(c);
-        });
+        function populateCourtDropdowns() {
+            const globalSel = document.getElementById('globalDefaultCourtSelect');
+            const addSel = document.getElementById('addCourtSelect');
+            const manageSel = document.getElementById('manageCourtSelect');
 
-        let html = '';
-        Object.keys(groupsMap).forEach(gName => {
-            const courtsInGroup = groupsMap[gName];
-            html += `
-                <div class="complex-group-section">
-                    <div class="complex-group-title">
-                        <i class="fa-solid ${gName === 'Standalone Courts' ? 'fa-building-columns' : 'fa-layer-group'}" style="color:var(--brand);"></i> 
-                        ${escapeHTML(gName)} (${courtsInGroup.length})
+            let html = '';
+            courtsList.forEach(c => { html += `<option value="${c.id}">${c.name}</option>`; });
+
+            globalSel.innerHTML = html;
+            addSel.innerHTML = html;
+            manageSel.innerHTML = html;
+
+            if(!defaultSelectedCourt && courtsList.length > 0) defaultSelectedCourt = courtsList[0].id;
+
+            globalSel.value = defaultSelectedCourt;
+            addSel.value = defaultSelectedCourt;
+            manageSel.value = defaultSelectedCourt;
+        }
+
+        function updateDefaultCourtSelection() {
+            const val = document.getElementById('globalDefaultCourtSelect').value;
+            defaultSelectedCourt = val;
+            localStorage.setItem('default_court_pref', val);
+            document.getElementById('addCourtSelect').value = val;
+            document.getElementById('manageCourtSelect').value = val;
+            if(document.getElementById('manageAssetView').classList.contains('active')) renderSeatWiseAssets();
+        }
+
+        /* ADD ASSET DEVICE ROW WITH DATALISTS */
+        function addDeviceRow() {
+            const container = document.getElementById('devicesContainer');
+            const rowId = 'dev_' + Date.now();
+            const html = `
+                <div class="device-row" id="${rowId}">
+                    <i class="fa-solid fa-trash remove-dev-btn" onclick="document.getElementById('${rowId}').remove()"></i>
+                    <div class="grid-2">
+                        <div class="form-group" style="margin:0;"><label>Make/Item</label><input type="text" class="dev-make" list="listMakes" placeholder="Desktop, Printer"></div>
+                        <div class="form-group" style="margin:0;"><label>Model</label><input type="text" class="dev-model" list="listModels" placeholder="Veriton, M2170"></div>
                     </div>
-                    <div class="courts-grid">
+                    <div class="form-group" style="margin:6px 0 0;"><label>Serial No *</label><input type="text" class="dev-serial" list="listSerials" placeholder="Serial Number"></div>
+                </div>
             `;
-            courtsInGroup.forEach(c => {
-                const assets = globalStore[c.id] ? globalStore[c.id].assets || [] : [];
-                const liveCount = assets.filter(a => !String(a[5]||'').toLowerCase().includes('ewaste')).length;
-                const defectiveCount = assets.filter(a => String(a[5]||'').toLowerCase().includes('defective')).length;
-                let matchedDevice = null;
-                if (query.length > 0) {
-                    matchedDevice = assets.find(a => 
-                        String(a[3]||'').toLowerCase().includes(query) || 
-                        String(a[1]||'').toLowerCase().includes(query) || 
-                        String(a[0]||'').toLowerCase().includes(query) || 
-                        String(a[2]||'').toLowerCase().includes(query) || 
-                        String(a[4]||'').toLowerCase().includes(query)
-                    );
-                }
-                html += `
-                    <div class="court-card" onclick="openCourt('${escapeHTML(c.id)}', '${escapeHTML(c.name)}')">
-                        <h3><i class="fa-solid fa-gavel" style="color: var(--brand); margin-right: 6px;"></i> ${escapeHTML(c.name)}</h3>
-                        <p>${escapeHTML(c.desc)}</p>
-                        ${matchedDevice ? `
-                            <div class="search-match-box">
-                                <strong><i class="fa-solid fa-bullseye" style="color:var(--brand);"></i> Matched Search Item:</strong>
-                                <span><b>${escapeHTML(matchedDevice[2])} ${escapeHTML(matchedDevice[4])}</b></span><br>
-                                <span>S/N: <code style="background:#dbeafe; padding:1px 4px; border-radius:4px; font-weight:bold;">${escapeHTML(matchedDevice[3])}</code></span> | 
-                                <span>User: ${escapeHTML(matchedDevice[1])}</span>
-                            </div>
-                        ` : ''}
-                        <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); display:flex; justify-content:space-between; align-items:center; font-size: 0.78rem; font-weight: 800;">
-                            <span style="color:var(--brand);">${liveCount} Active Assets</span>
-                            ${defectiveCount > 0 ? `<span style="color:var(--danger);"><i class="fa-solid fa-circle-exclamation"></i> ${defectiveCount} Faulty</span>` : `<span style="color:var(--success);"><i class="fa-solid fa-circle-check"></i> Healthy</span>`}
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function saveMultiAssets() {
+            const courtId = document.getElementById('addCourtSelect').value;
+            const staff = document.getElementById('addStaff').value.trim();
+            const desig = document.getElementById('addDesig').value.trim();
+            const installDate = document.getElementById('addInstallDate').value;
+            const omNo = document.getElementById('addOmNo').value.trim();
+
+            const rows = document.querySelectorAll('.device-row');
+            let devices = [];
+
+            rows.forEach(r => {
+                const make = r.querySelector('.dev-make').value.trim();
+                const model = r.querySelector('.dev-model').value.trim();
+                const serial = r.querySelector('.dev-serial').value.trim().toUpperCase();
+                if(serial) devices.push({ make, model, serial });
+            });
+
+            if(!staff || !desig) return Swal.fire('Required', 'Staff Name & Seat/Designation required!', 'error');
+            if(devices.length === 0) return Swal.fire('Required', 'Please enter at least one Serial No!', 'error');
+
+            if(!globalStore[courtId]) globalStore[courtId] = { assets: [], ewaste: [] };
+            devices.forEach(d => {
+                globalStore[courtId].assets.push([desig, staff, d.make, d.serial, d.model, 'Active', installDate, omNo, '', '', '', '']);
+            });
+
+            Swal.fire({icon:'success', title:'Asset Saved!', showConfirmButton:false, timer:1200});
+            document.getElementById('addStaff').value = '';
+            document.getElementById('addDesig').value = '';
+            document.getElementById('devicesContainer').innerHTML = '';
+            addDeviceRow();
+
+            fetch(apiURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'saveMultiAssets', page: courtId, staff, desig, installDate, omNo, devices })
+            });
+        }
+
+        /* MANAGE / EDIT ASSETS */
+        function renderSeatWiseAssets() {
+            const courtId = document.getElementById('manageCourtSelect').value;
+            const q = document.getElementById('mobileSearchInput').value.toLowerCase().trim();
+            const container = document.getElementById('seatWiseAssetsContainer');
+
+            const assets = globalStore[courtId] ? globalStore[courtId].assets || [] : [];
+            container.innerHTML = '';
+
+            let filtered = assets.filter(a => {
+                return String(a[0]||'').toLowerCase().includes(q) ||
+                       String(a[1]||'').toLowerCase().includes(q) ||
+                       String(a[2]||'').toLowerCase().includes(q) ||
+                       String(a[3]||'').toLowerCase().includes(q) ||
+                       String(a[4]||'').toLowerCase().includes(q);
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center; color:#64748b; padding:20px; font-size:0.8rem;">No assets found for this court.</div>`;
+                return;
+            }
+
+            filtered.forEach((a) => {
+                const realIndex = assets.findIndex(orig => orig[3] === a[3]);
+                container.innerHTML += `
+                    <div class="asset-item-card" onclick="openEditModal('${courtId}', ${realIndex})">
+                        <div class="seat-tag">${escapeHTML(a[0])||'Seat Unassigned'}</div>
+                        <div class="staff-name">${escapeHTML(a[1])||'Staff Unassigned'}</div>
+                        <div style="font-size:0.78rem; color:#64748b;">
+                            <b>${escapeHTML(a[2])} ${escapeHTML(a[4])}</b><br>
+                            S/N: <span class="serial-no">${escapeHTML(a[3])}</span> | Status: <b>${escapeHTML(a[5]||'Active')}</b>
                         </div>
                     </div>
                 `;
             });
-            html += `</div></div>`;
-        });
-        if (html === '') {
-            html = `<div style="text-align:center; padding:40px; color:var(--text-sub);">
-                        <i class="fa-solid fa-magnifying-glass" style="font-size:2rem; margin-bottom:10px; color:var(--border);"></i>
-                        <p>No courts or serial numbers found matching "<b>${escapeHTML(searchQuery)}</b>"</p>
-                    </div>`;
-        }
-        container.innerHTML = html;
-    }
-
-    function filterCourts() {
-        const q = document.getElementById('courtSearchInput').value.trim().toLowerCase();
-        if (!q) { renderCourtCards(courtsList, ''); return; }
-        const filtered = courtsList.filter(c => {
-            const courtNameMatch = c.name.toLowerCase().includes(q);
-            const courtDescMatch = c.desc.toLowerCase().includes(q);
-            const groupMatch = c.group && c.group.toLowerCase().includes(q);
-            const assets = globalStore[c.id] ? globalStore[c.id].assets || [] : [];
-            const assetMatch = assets.some(a => 
-                String(a[3]||'').toLowerCase().includes(q) || String(a[1]||'').toLowerCase().includes(q) || 
-                String(a[0]||'').toLowerCase().includes(q) || String(a[2]||'').toLowerCase().includes(q) || String(a[4]||'').toLowerCase().includes(q)
-            );
-            return courtNameMatch || courtDescMatch || groupMatch || assetMatch;
-        });
-        renderCourtCards(filtered, q);
-    }
-
-    function openCourt(courtId, fullName, updateHash = true) {
-        currentCourt = courtId;
-        if(updateHash) window.location.hash = `court=${courtId}`;
-        document.getElementById('currentCourtName').innerText = fullName;
-        document.getElementById('homeView').classList.remove('active');
-        document.getElementById('reportsView').classList.remove('active');
-        document.getElementById('courtDetailView').classList.add('active');
-        const homeSearchVal = document.getElementById('courtSearchInput').value.trim();
-        if(homeSearchVal) { document.getElementById('tableFilterInput').value = homeSearchVal; }
-        renderCourtTables();
-    }
-
-    function goToHome(updateHash = true) {
-        if(updateHash) window.location.hash = '';
-        document.getElementById('courtDetailView').classList.remove('active');
-        document.getElementById('reportsView').classList.remove('active');
-        document.getElementById('homeView').classList.add('active');
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('navHome').classList.add('active');
-        calculateHomeStats();
-    }
-
-    function renderCourtTables() {
-        const courtData = globalStore[currentCourt] || { assets: [], ewaste: [], staffStrength: [] };
-        const assets = courtData.assets || [];
-        const ewaste = courtData.ewaste || [];
-        const staffStrength = courtData.staffStrength || [];
-        let activeCount = 0, pcsCount = 0, defectiveCount = 0, ewasteCount = ewaste.length;
-        const totalStaffCount = staffStrength.reduce((sum, item) => sum + (Number(item.count) || 0), 0);
-
-        assets.forEach(a => {
-            const status = String(a[5]||'Active').toLowerCase();
-            const itemType = String(a[2]||'').toLowerCase();
-            if(status.includes('ewaste') || status.includes('condemned')) {
-                ewasteCount++;
-            } else {
-                activeCount++;
-                if(itemType.includes('pc') || itemType.includes('desktop') || itemType.includes('veriton')) pcsCount++;
-                if(status.includes('defective') || status.includes('complaint')) defectiveCount++;
-            }
-        });
-
-        document.getElementById('cMetricTotal').innerText = activeCount;
-        document.getElementById('cMetricPcs').innerText = pcsCount;
-        document.getElementById('cMetricDefective').innerText = defectiveCount;
-        document.getElementById('cMetricEwaste').innerText = ewasteCount;
-        const staffMetricElem = document.getElementById('cMetricStaff');
-        if (staffMetricElem) staffMetricElem.innerText = totalStaffCount;
-
-        applyTableFilter();
-    }
-
-    function applyTableFilter() {
-        const q = document.getElementById('tableFilterInput').value.toLowerCase();
-        const courtData = globalStore[currentCourt] ? globalStore[currentCourt].assets : [];
-        let indexedAssets = courtData.map((row, originalIndex) => ({ row, originalIndex }));
-        const filtered = indexedAssets.filter(item => {
-            const r = item.row;
-            return String(r[0]||'').toLowerCase().includes(q) || String(r[1]||'').toLowerCase().includes(q) ||
-                   String(r[2]||'').toLowerCase().includes(q) || String(r[3]||'').toLowerCase().includes(q) ||
-                   String(r[4]||'').toLowerCase().includes(q) || String(r[5]||'').toLowerCase().includes(q);
-        });
-        const priorityOrder = ['judge', 'magistrate', 'sheristadar', 'junior superintendent', 'js', 'head clerk', 'bench clerk'];
-        filtered.sort((a, b) => {
-            const desigA = String(a.row[0] || '').toLowerCase().trim();
-            const desigB = String(b.row[0] || '').toLowerCase().trim();
-            let rankA = priorityOrder.findIndex(p => desigA.includes(p));
-            let rankB = priorityOrder.findIndex(p => desigB.includes(p));
-            if (rankA === -1) rankA = 999;
-            if (rankB === -1) rankB = 999;
-            if (rankA !== rankB) return rankA - rankB;
-            return desigA.localeCompare(desigB);
-        });
-        renderLiveTable(filtered);
-    }
-
-    function getOperationalStatusBadge(status) {
-        const st = String(status || 'Active').trim();
-        if(st === 'Defective') return `<span class="badge badge-warning"><i class="fa-solid fa-wrench"></i> Defective</span>`;
-        if(st === 'Not Allotted') return `<span class="badge badge-info"><i class="fa-solid fa-box-open"></i> Not Allotted</span>`;
-        if(st === 'Not in Use') return `<span class="badge badge-none"><i class="fa-solid fa-pause"></i> Not in Use</span>`;
-        if(st === 'Moved to E-Waste' || st === 'Condemned') return `<span class="badge badge-expired"><i class="fa-solid fa-dumpster"></i> Condemned</span>`;
-        return `<span class="badge badge-active"><i class="fa-solid fa-circle-check"></i> Active</span>`;
-    }
-
-    function getCoverageStatusBadge(wStart, wEnd, amcStart, amcEnd) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        let parsedStart = parseFlexibleDate(amcStart) || parseFlexibleDate(wStart);
-        let parsedEnd = parseFlexibleDate(amcEnd) || parseFlexibleDate(wEnd);
-        let type = parseFlexibleDate(amcEnd) ? 'AMC' : 'Warranty';
-        if (!parsedEnd) return `<span class="badge badge-none"><i class="fa-solid fa-circle-minus"></i> No Coverage</span>`;
-
-        const totalDays = parsedStart ? Math.max(1, Math.ceil((parsedEnd - parsedStart) / (1000 * 60 * 60 * 24))) : 1095;
-        const remainingDays = Math.ceil((parsedEnd - today) / (1000 * 60 * 60 * 24));
-        let badgeClass = 'badge-active'; let barColor = '#10b981';
-        let statusText = `${type} Active`; let daysText = `${remainingDays} Days Left`;
-        let barWidthPct = Math.max(0, Math.min(100, Math.round((remainingDays / totalDays) * 100)));
-
-        if (remainingDays < 0) {
-            badgeClass = 'badge-expired'; barColor = '#ef4444';
-            statusText = `${type} Expired`; daysText = `${Math.abs(remainingDays)} Days Expired`; barWidthPct = 100;
-        } else if (remainingDays <= 60) {
-            badgeClass = 'badge-warning'; barColor = '#f59e0b'; statusText = `Ends Soon`;
-        }
-        const startStr = formatDateForDisplay(wStart || amcStart);
-        const endStr = formatDateForDisplay(wEnd || amcEnd);
-        return `
-            <div style="display: flex; flex-direction: column; gap: 4px; min-width: 165px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span class="badge ${badgeClass}" style="margin:0; font-size: 0.68rem; padding: 2px 8px;">${statusText}</span>
-                    <span style="font-size: 0.68rem; font-weight: 800; color: ${barColor};">${daysText}</span>
-                </div>
-                <div style="width: 100%; height: 5px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
-                    <div style="width: ${barWidthPct}%; height: 100%; background: ${barColor}; border-radius: 4px; transition: width 0.3s ease;"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: #64748b; font-weight: 600; font-family: monospace;">
-                    <span>${escapeHTML(startStr)}</span>
-                    <i class="fa-solid fa-angle-right" style="font-size: 0.6rem; color: #94a3b8; align-self: center;"></i>
-                    <span style="color: #0f172a; font-weight: 700;">${escapeHTML(endStr)}</span>
-                </div>
-            </div>`;
-    }
-
-    function copySerial(txt) {
-        navigator.clipboard.writeText(txt);
-        Swal.fire({toast: true, position: 'bottom-end', icon: 'info', title: `Copied: ${escapeHTML(txt)}`, showConfirmButton: false, timer: 1200});
-    }
-
-    function renderLiveTable(itemsWithIndices) {
-        const tbody = document.getElementById('liveTableBody');
-        tbody.innerHTML = '';
-        if(!itemsWithIndices || itemsWithIndices.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; padding: 25px; color: var(--text-sub);">No assets found.</td></tr>`;
-            return;
-        }
-        itemsWithIndices.forEach(itemObj => {
-            const r = itemObj.row; const idx = itemObj.originalIndex;
-            const opBadge = getOperationalStatusBadge(r[5]);
-            const covBadge = getCoverageStatusBadge(r[8], r[9], r[10], r[11]);
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${escapeHTML(r[1])||'Unassigned'}</strong><br><span style="font-size:0.75rem; color:var(--brand); font-weight:700;">${escapeHTML(r[0])||'-'}</span></td>
-                    <td><strong>${escapeHTML(r[2])||'-'}</strong> <br><span style="color:var(--text-sub); font-size:0.8rem;">${escapeHTML(r[4])||'-'}</span></td>
-                    <td><span class="copy-serial" onclick="copySerial('${escapeHTML(r[3])||''}')" title="Click to Copy">${escapeHTML(r[3])||'-'}</span></td>
-                    <td>${opBadge}</td>
-                    <td>${covBadge}</td>
-                    <td><span style="font-size:0.8rem;">📅 ${escapeHTML(r[6])||'-'}</span><br><span style="font-size:0.75rem; color:var(--text-sub);">OM: ${escapeHTML(r[7])||'-'}</span></td>
-                    <td>
-                        <div style="display:flex; gap:6px;">
-                            <button class="btn btn-sm" style="color: var(--brand);" onclick="editAsset(${idx})" title="Edit Asset"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                            <button class="btn btn-sm" style="color: #059669;" onclick="generateAssetQR(${idx})" title="Generate QR Sticker"><i class="fa-solid fa-qrcode"></i> QR</button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-    }
-
-    // Reports Logic
-    function populateReportCourtDropdown() {
-        const sel = document.getElementById('reportCourtSelect');
-        if(!sel) return;
-        let groups = [...new Set(courtsList.map(c => c.group).filter(g => g && g.trim() !== ''))];
-        let html = '<option value="ALL">-- All Courts (District Consolidated Overview) --</option>';
-        if(groups.length > 0) {
-            html += `<optgroup label="🏛️ Complex Groups (Combined Reports)">`;
-            groups.forEach(g => { html += `<option value="GROUP_${escapeHTML(g)}">🏛️ ${escapeHTML(g)} (All Sub-Courts Combined)</option>`; });
-            html += `</optgroup>`;
-        }
-        html += `<optgroup label="⚖️ Individual Courts">`;
-        courtsList.forEach(c => { html += `<option value="${escapeHTML(c.id)}">${escapeHTML(c.name)} ${c.group ? '[' + escapeHTML(c.group) + ']' : ''}</option>`; });
-        html += `</optgroup>`;
-        sel.innerHTML = html;
-    }
-
-    function openSpecificReport(reportType, updateHash = true) {
-        if(updateHash) window.location.hash = `report=${reportType}`;
-        document.getElementById('homeView').classList.remove('active');
-        document.getElementById('courtDetailView').classList.remove('active');
-        document.getElementById('reportsView').classList.add('active');
-        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('navReports').classList.add('active');
-        const sel = document.getElementById('reportTypeSelect');
-        if(sel) sel.value = reportType;
-        generateSelectedReport();
-    }
-
-    function generateSelectedReport() {
-        const courtSelection = document.getElementById('reportCourtSelect').value;
-        const reportType = document.getElementById('reportTypeSelect').value;
-        const container = document.getElementById('reportOutputContainer');
-        let targetCourts = [];
-        let scopeTitle = '';
-        let isGroupedMode = false;
-
-        if(courtSelection === 'ALL') {
-            targetCourts = courtsList; scopeTitle = 'All Courts Jurisdiction (District Consolidated)';
-        } else if(courtSelection.startsWith('GROUP_')) {
-            const gName = courtSelection.replace('GROUP_', '');
-            targetCourts = courtsList.filter(c => c.group === gName);
-            scopeTitle = `Consolidated Group: ${gName}`; isGroupedMode = true;
-        } else {
-            targetCourts = courtsList.filter(c => c.id === courtSelection);
-            scopeTitle = targetCourts[0]?.name || '';
         }
 
-        const reportTitles = {
-            'HC_MATRIX': 'CONSOLIDATED HARDWARE STATEMENT MATRIX (e-Courts)',
-            'DETAILED': 'STAFF STRENGTH & IT ASSET INVENTORY REGISTER',
-            'DEFECTIVE': 'DEFECTIVE EQUIPMENT & PENDING COMPLAINTS STATEMENT',
-            'EWASTE': 'CONDEMNED & E-WASTE DISPOSAL REGISTER',
-            'EXPIRING_AMC': 'AMC & WARRANTY EXPIRY FORECAST REPORT (30-90 DAYS)',
-            'SPARE_STOCK': 'SPARE STOCK & UNASSIGNED / IDLE HARDWARE STATEMENT',
-            'AGEING': 'LEGACY HARDWARE AGEING & CONDEMNATION PROPOSAL (5+ YEARS OLD)',
-            'OM_WISE': 'HIGH COURT OFFICIAL MEMORANDUM (OM) WISE SUPPLY STATEMENT',
-            'MODEL_SUMMARY': 'HARDWARE MAKE & MODEL DISTRIBUTION BREAKDOWN MATRIX',
-            'SEAT_AUDIT': 'SEAT & DESIGNATION HARDWARE ALLOCATION AUDIT CHECKLIST'
-        };
+        function openEditModal(courtId, index) {
+            const item = globalStore[courtId].assets[index];
+            if(!item) return;
 
-        let html = `
-            <div style="text-align:center; margin-bottom:20px; border-bottom:2px solid #000; padding-bottom:10px;">
-                <h3 style="margin:0; text-transform:uppercase;">DISTRICT COURT KOZHIKODE - e-Courts IT CELL</h3>
-                <h4 style="margin:5px 0 0 0; color:var(--brand-dark);">${reportTitles[reportType] || 'OFFICIAL IT INVENTORY REPORT'}</h4>
-                <p style="margin:2px 0 0 0; font-size:0.8rem; color:var(--text-sub);">Generated Date: ${new Date().toLocaleDateString('en-IN')} | Scope: ${escapeHTML(scopeTitle)}</p>
-            </div>
-        `;
+            document.getElementById('editDesig').value = item[0] || '';
+            document.getElementById('editStaff').value = item[1] || '';
+            document.getElementById('editMake').value = item[2] || '';
+            document.getElementById('editOldSerial').value = item[3] || '';
+            document.getElementById('editSerial').value = item[3] || '';
+            document.getElementById('editModel').value = item[4] || '';
+            document.getElementById('editStatus').value = item[5] || 'Active';
+            document.getElementById('editInstallDate').value = item[6] || '';
+            document.getElementById('editOmNo').value = item[7] || '';
 
-        if(reportType === 'HC_MATRIX') {
-            html += `<style>.hc-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 11px; background-color: #ffffff; } .hc-table th { border: 1px solid #000; padding: 5px; text-align: center; font-weight: bold; background-color: #f1f5f9; color: #000; } .hc-table td { border: 1px solid #000; padding: 5px; text-align: left; vertical-align: top; color: #000; } .hc-table .num { text-align: center; font-weight: bold; }</style>
-            <div style="overflow-x: auto;"><table id="reportGeneratedTable" class="hc-table">
-            <thead><tr><th rowspan="2" style="width:140px;">Name of Court</th><th colspan="3">All-in-One PC</th><th colspan="3">Desktop PC</th><th colspan="3">Laptop</th><th colspan="3">UPS</th><th colspan="3">MFDs / MFPs</th><th colspan="3">Printers</th><th colspan="3">Scanner (Sheetfed)</th><th colspan="3">Doc. Visualiser</th></tr>
-            <tr><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th><th>Make</th><th>Working</th><th>Not Working</th></tr></thead><tbody>`;
+            document.getElementById('modalOverlay').style.display = 'block';
+            document.getElementById('editAssetModal').style.display = 'block';
+        }
 
-            let renderingBlocks = [];
-            if(isGroupedMode) {
-                const groupName = courtSelection.replace('GROUP_', '');
-                let combinedAssets = [];
-                targetCourts.forEach(c => { combinedAssets = combinedAssets.concat(globalStore[c.id]?.assets || []); });
-                renderingBlocks.push({ displayName: groupName, assets: combinedAssets });
-            } else {
-                targetCourts.forEach(c => { renderingBlocks.push({ displayName: c.name, assets: globalStore[c.id]?.assets || [] }); });
-            }
+        function closeEditModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('editAssetModal').style.display = 'none';
+        }
 
-            renderingBlocks.forEach(block => {
-                let catMap = { AIO: {}, Desktop: {}, Laptop: {}, UPS: {}, MFD: {}, Printer: {}, Scanner: {}, Visualiser: {} };
-                block.assets.forEach(a => {
-                    let make = (a[2] || '').trim(); let model = (a[4] || '').trim();
-                    const status = String(a[5]||'Active').toLowerCase();
-                    const combinedL = `${make} ${model}`.toLowerCase();
-                    if(combinedL.includes('monitor')) return;
-                    let catKey = 'Desktop';
-                    if(combinedL.includes('all in one') || combinedL.includes('all-in-one') || combinedL.includes('aio') || combinedL.includes('proone')) catKey = 'AIO';
-                    else if(combinedL.includes('laptop') || combinedL.includes('notebook') || combinedL.includes('e41-55')) catKey = 'Laptop';
-                    else if(combinedL.includes('ups') || combinedL.includes('libert') || combinedL.includes('1kv')) catKey = 'UPS';
-                    else if(combinedL.includes('mfd') || combinedL.includes('mfp')) catKey = 'MFD';
-                    else if(combinedL.includes('scanner') || combinedL.includes('scanjet')) catKey = 'Scanner';
-                    else if(combinedL.includes('visualiser') || combinedL.includes('doc')) catKey = 'Visualiser';
-                    else if(combinedL.includes('printer') || combinedL.includes('epson') || combinedL.includes('canon')) catKey = 'Printer';
-                    
-                    let cleanMake = make, cleanModel = model;
-                    if(['generic', 'unknown', '-', ''].includes(cleanMake.toLowerCase())) cleanMake = '';
-                    const prefixRegex = /^(PRINTER|DESKTOP|CPU|LAPTOP|SCANNER|UPS|ALL IN ONE PC|ALL IN ONE|AIO)\s+/i;
-                    cleanMake = cleanMake.replace(prefixRegex, '').trim();
-                    cleanModel = cleanModel.replace(prefixRegex, '').trim();
-                    let displayName = cleanMake && cleanModel ? (cleanModel.toLowerCase().includes(cleanMake.toLowerCase()) ? cleanModel : `${cleanMake} ${cleanModel}`) : (cleanMake || cleanModel || "Unspecified Hardware");
-                    displayName = displayName.replace(prefixRegex, '').replace(/\s+/g, ' ').trim();
-                    let groupKey = displayName.toLowerCase().replace(/ecotank\s*/g, '').replace(/laserjet\s*/g, '').replace(/[^a-z0-9]/g, '') || ('item_' + catKey);
-                    const isWorking = !status.includes('defective') && !status.includes('complaint') && !status.includes('ewaste') && !status.includes('moved') && !status.includes('not in use');
+        function saveEditAsset() {
+            const courtId = document.getElementById('manageCourtSelect').value;
+            const oldSerial = document.getElementById('editOldSerial').value;
+            const newSerial = document.getElementById('editSerial').value.trim().toUpperCase();
 
-                    if(!catMap[catKey][groupKey]) catMap[catKey][groupKey] = { name: displayName, w: 0, nw: 0 };
-                    if(isWorking) catMap[catKey][groupKey].w++; else catMap[catKey][groupKey].nw++;
-                });
+            if(!newSerial) return Swal.fire('Required', 'Serial Number cannot be empty.', 'error');
 
-                const keys = ['AIO', 'Desktop', 'Laptop', 'UPS', 'MFD', 'Printer', 'Scanner', 'Visualiser'];
-                let catArrays = {}, maxRows = 1;
-                keys.forEach(k => { catArrays[k] = Object.values(catMap[k]); if(catArrays[k].length > maxRows) maxRows = catArrays[k].length; });
+            const updatedRow = [
+                document.getElementById('editDesig').value,
+                document.getElementById('editStaff').value,
+                document.getElementById('editMake').value,
+                newSerial,
+                document.getElementById('editModel').value,
+                document.getElementById('editStatus').value,
+                document.getElementById('editInstallDate').value,
+                document.getElementById('editOmNo').value, '', '', '', ''
+            ];
 
-                for(let r = 0; r < maxRows; r++) {
-                    html += `<tr>`;
-                    if(r === 0) html += `<td rowspan="${maxRows}" style="font-weight:bold; background-color:#ffffff; vertical-align:middle;">${escapeHTML(block.displayName)}</td>`;
-                    keys.forEach(k => {
-                        const item = catArrays[k][r];
-                        if(item) html += `<td>${escapeHTML(item.name)}</td><td class="num" style="color:green;">${item.w}</td><td class="num" style="color:${item.nw > 0 ? 'red' : 'inherit'};">${item.nw}</td>`;
-                        else html += `<td></td><td class="num"></td><td class="num"></td>`;
-                    });
-                    html += `</tr>`;
-                }
+            const idx = globalStore[courtId].assets.findIndex(a => a[3] === oldSerial);
+            if(idx !== -1) globalStore[courtId].assets[idx] = updatedRow;
+
+            closeEditModal();
+            renderSeatWiseAssets();
+            Swal.fire({icon:'success', title:'Asset Updated!', showConfirmButton:false, timer:1200});
+
+            fetch(apiURL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'editAsset', page: courtId, oldSerial,
+                    newDesig: updatedRow[0], newStaff: updatedRow[1], newMake: updatedRow[2],
+                    newSerial: updatedRow[3], newModel: updatedRow[4], newStatus: updatedRow[5],
+                    newInstallDate: updatedRow[6], newOmNo: updatedRow[7]
+                })
             });
-            html += `</tbody></table></div>`;
-        } 
-        else if (reportType === 'EXPIRING_AMC') {
-            const today = new Date();
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Staff / Seat</th><th>Make & Model</th><th>Serial Number</th><th>Coverage End Date</th><th>Status & Remaining Days</th></tr></thead><tbody>`;
-            let count = 0;
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    const wEnd = a[9], amcEnd = a[11];
-                    let targetDate = parseFlexibleDate(amcEnd) || parseFlexibleDate(wEnd);
-                    let type = parseFlexibleDate(amcEnd) ? 'AMC' : 'Warranty';
-                    if(targetDate) {
-                        const diffDays = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-                        if(diffDays <= 90) {
-                            count++;
-                            const statusColor = diffDays < 0 ? '#ef4444' : (diffDays <= 30 ? '#d97706' : '#2563eb');
-                            const statusText = diffDays < 0 ? `${type} Expired (${Math.abs(diffDays)} days ago)` : `${type} Expiring in ${diffDays} days`;
-                            html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td><b>${escapeHTML(a[1])||'Unassigned'}</b><br><small>${escapeHTML(a[0])||''}</small></td><td>${escapeHTML(a[2])||'-'} <br><small>${escapeHTML(a[4])||''}</small></td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(a[3])||'-'}</td><td>${targetDate.toLocaleDateString('en-IN')}</td><td><strong style="color:${statusColor};">${statusText}</strong></td></tr>`;
-                        }
-                    }
-                });
-            });
-            if(count === 0) html += `<tr><td colspan="6" style="text-align:center; padding:20px;">No AMC / Warranty expiries in the next 90 days.</td></tr>`;
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'SPARE_STOCK') {
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Current Seat Location</th><th>Make & Model</th><th>Serial Number</th><th>Stock Status</th><th>Installation Date</th></tr></thead><tbody>`;
-            let count = 0;
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    const status = String(a[5]||'Active').trim();
-                    if(status === 'Not Allotted' || status === 'Not in Use') {
-                        count++;
-                        html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td>${escapeHTML(a[0])||'Reserve Stock'}</td><td>${escapeHTML(a[2])||'-'} <br><small>${escapeHTML(a[4])||''}</small></td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(a[3])||'-'}</td><td><span class="badge badge-info">${escapeHTML(status)}</span></td><td>${escapeHTML(a[6])||'-'}</td></tr>`;
-                    }
-                });
-            });
-            if(count === 0) html += `<tr><td colspan="6" style="text-align:center; padding:20px;">No spare or unassigned hardware found in stock.</td></tr>`;
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'STAFF_GAP') {
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Sanctioned Post / Seat</th><th style="text-align:center;">Sanctioned Strength</th><th style="text-align:center; color:green;">Working Device Allotted</th><th style="text-align:center; color:red;">Defective Devices</th><th>Allocated Models & Shortage Gap</th></tr></thead><tbody>`;
-            targetCourts.forEach(c => {
-                const staffPosts = globalStore[c.id]?.staffStrength || [];
-                const assets = globalStore[c.id]?.assets || [];
-                if (staffPosts.length === 0) {
-                    html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td colspan="5" style="text-align:center; color:var(--text-sub);">No staff strength data recorded for this court. (Use 'Manage Staff Posts' button)</td></tr>`;
-                } else {
-                    staffPosts.forEach(st => {
-                        const desigLower = String(st.desig).toLowerCase().trim();
-                        const matchingAssets = assets.filter(a => {
-                            const seat = String(a[0] || '').toLowerCase().trim();
-                            return seat.includes(desigLower) || desigLower.includes(seat);
-                        });
-                        let workingPcs = 0; let defectivePcs = 0; let modelsList = [];
-                        matchingAssets.forEach(a => {
-                            const status = String(a[5] || 'Active').toLowerCase();
-                            const makeMod = `${a[2] || ''} ${a[4] || ''}`.trim();
-                            if (status.includes('defective') || status.includes('complaint')) { defectivePcs++; } 
-                            else if (!status.includes('ewaste') && !status.includes('condemned')) { workingPcs++; }
-                            if (makeMod) { modelsList.push(`${makeMod} (S/N: ${a[3] || '-'})`); }
-                        });
-                        const gap = st.count - workingPcs;
-                        const gapBadge = gap > 0 ? `<span class="badge badge-warning"><i class="fa-solid fa-triangle-exclamation"></i> Gap: Shortage of ${gap} PC(s)</span>` : `<span class="badge badge-active"><i class="fa-solid fa-circle-check"></i> Sufficient</span>`;
-                        html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td><strong style="color:var(--brand);">${escapeHTML(st.desig)}</strong></td><td style="text-align:center; font-weight:bold; font-size:1rem;">${st.count}</td><td style="text-align:center; color:green; font-weight:bold; font-size:1rem;">${workingPcs}</td><td style="text-align:center; color:${defectivePcs > 0 ? 'red' : 'inherit'}; font-weight:bold;">${defectivePcs}</td><td>${modelsList.length > 0 ? `<div style="font-size:0.78rem; margin-bottom:4px; color:#334155;"><b>Models:</b> ${escapeHTML(modelsList.join(', '))}</div>` : ''}${gapBadge}</td></tr>`;
-                    });
-                }
-            });
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'AGEING') {
-            const currentYear = new Date().getFullYear();
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Staff / Seat</th><th>Make & Model</th><th>Serial Number</th><th>Installation Date</th><th>Age / Condemnation Eligibility</th></tr></thead><tbody>`;
-            let count = 0;
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    const instDateStr = a[6];
-                    let dt = parseFlexibleDate(instDateStr);
-                    let instYear = dt ? dt.getFullYear() : null;
-                    if(instYear && (currentYear - instYear >= 5)) {
-                        count++; const age = currentYear - instYear;
-                        html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td><b>${escapeHTML(a[1])||'Unassigned'}</b><br><small>${escapeHTML(a[0])||''}</small></td><td>${escapeHTML(a[2])||'-'} <br><small>${escapeHTML(a[4])||''}</small></td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(a[3])||'-'}</td><td>${escapeHTML(instDateStr)}</td><td><span class="badge badge-warning"><i class="fa-solid fa-clock-rotate-left"></i> ${age} Years Old (Condemnation Eligible)</span></td></tr>`;
-                    }
-                });
-            });
-            if(count === 0) html += `<tr><td colspan="6" style="text-align:center; padding:20px;">No hardware older than 5 years recorded.</td></tr>`;
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'OM_WISE') {
-            let omMap = {};
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    const om = String(a[7]||'Direct / Local Supply').trim();
-                    if(!omMap[om]) omMap[om] = [];
-                    omMap[om].push({ courtName: c.name, row: a });
-                });
-            });
-            html += `<table id="reportGeneratedTable"><thead><tr><th>High Court OM Number</th><th>Court Jurisdiction</th><th>Staff Name & Seat</th><th>Hardware Make & Model</th><th>Serial Number</th><th>Installation Date</th></tr></thead><tbody>`;
-            Object.keys(omMap).forEach(omKey => {
-                const items = omMap[omKey];
-                items.forEach((item, idx) => {
-                    html += `<tr>`;
-                    if(idx === 0) html += `<td rowspan="${items.length}" style="font-weight:bold; vertical-align:middle; background:#f8fafc;">${escapeHTML(omKey)}</td>`;
-                    html += `<td>${escapeHTML(item.courtName)}</td><td><b>${escapeHTML(item.row[1])}</b> <br><small>${escapeHTML(item.row[0])}</small></td><td>${escapeHTML(item.row[2])} ${escapeHTML(item.row[4])}</td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(item.row[3])}</td><td>${escapeHTML(item.row[6])}</td></tr>`;
-                });
-            });
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'MODEL_SUMMARY') {
-            let modelCounts = {};
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    const combined = `${a[2]||''} ${a[4]||''}`.trim();
-                    if(!combined) return;
-                    if(!modelCounts[combined]) modelCounts[combined] = { total: 0, working: 0, defective: 0 };
-                    modelCounts[combined].total++;
-                    const st = String(a[5]||'Active').toLowerCase();
-                    if(st.includes('defective') || st.includes('complaint')) modelCounts[combined].defective++;
-                    else modelCounts[combined].working++;
-                });
-            });
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Hardware Brand / Model Name</th><th style="text-align:center;">Total Deployed Count</th><th style="text-align:center; color:green;">Working Units</th><th style="text-align:center; color:red;">Defective Units</th></tr></thead><tbody>`;
-            Object.keys(modelCounts).sort().forEach(mKey => {
-                const m = modelCounts[mKey];
-                html += `<tr><td><b>${escapeHTML(mKey)}</b></td><td style="text-align:center; font-weight:bold;">${m.total}</td><td style="text-align:center; color:green; font-weight:bold;">${m.working}</td><td style="text-align:center; color:${m.defective > 0 ? 'red' : 'inherit'}; font-weight:bold;">${m.defective}</td></tr>`;
-            });
-            html += `</tbody></table>`;
-        }
-        else if (reportType === 'SEAT_AUDIT') {
-            html += `<table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Seat / Designation</th><th>Assigned Staff Name</th><th>Hardware Item</th><th>Serial Number</th><th>Audit Status</th></tr></thead><tbody>`;
-            targetCourts.forEach(c => {
-                (globalStore[c.id]?.assets || []).forEach(a => {
-                    html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td><strong style="color:var(--brand);">${escapeHTML(a[0])||'-'}</strong></td><td><b>${escapeHTML(a[1])||'Unassigned'}</b></td><td>${escapeHTML(a[2])||'-'} ${escapeHTML(a[4])||''}</td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(a[3])||'-'}</td><td><span class="badge badge-active"><i class="fa-solid fa-check"></i> Verified</span></td></tr>`;
-                });
-            });
-            html += `</tbody></table>`;
-        }
-        else {
-            let uniqueStaffSet = new Set(); let workingPcsCount = 0; let notWorkingPcsCount = 0; let totalEwasteCount = 0;
-            targetCourts.forEach(c => {
-                const assets = globalStore[c.id]?.assets || [];
-                const ewaste = globalStore[c.id]?.ewaste || [];
-                totalEwasteCount += ewaste.length;
-                assets.forEach(a => {
-                    const staffName = String(a[1]||'').trim().toLowerCase();
-                    if(staffName && staffName !== '-' && staffName !== 'unassigned') uniqueStaffSet.add(staffName);
-                    const combinedL = `${a[2]||''} ${a[4]||''}`.toLowerCase();
-                    const status = String(a[5]||'Active').toLowerCase();
-                    if(combinedL.includes('pc') || combinedL.includes('desktop') || combinedL.includes('veriton') || combinedL.includes('aio') || combinedL.includes('all in one') || combinedL.includes('vostro')) {
-                        if(status.includes('defective') || status.includes('complaint')) notWorkingPcsCount++;
-                        else if(!status.includes('ewaste') && !status.includes('moved')) workingPcsCount++;
-                    }
-                });
-            });
-            html += `
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1;">
-                    <div style="text-align: center; border-right: 1px solid #cbd5e1;"><span style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; display: block;">Total Staff Strength</span><strong style="font-size: 1.6rem; color: #1e3a8a;">${uniqueStaffSet.size}</strong></div>
-                    <div style="text-align: center; border-right: 1px solid #cbd5e1;"><span style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; display: block;">Working PCs</span><strong style="font-size: 1.6rem; color: #10b981;">${workingPcsCount}</strong></div>
-                    <div style="text-align: center; border-right: 1px solid #cbd5e1;"><span style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; display: block;">Not Working PCs</span><strong style="font-size: 1.6rem; color: #ef4444;">${notWorkingPcsCount}</strong></div>
-                    <div style="text-align: center;"><span style="font-size: 0.72rem; color: #64748b; font-weight: 800; text-transform: uppercase; display: block;">E-Waste / Condemned</span><strong style="font-size: 1.6rem; color: #64748b;">${totalEwasteCount}</strong></div>
-                </div>
-                <table id="reportGeneratedTable"><thead><tr><th>Court Jurisdiction</th><th>Staff Name / Seat</th><th>Hardware Brand & Model</th><th>Serial Number</th><th>Current Status</th><th>Installation Date / OM</th></tr></thead><tbody>
-            `;
-            targetCourts.forEach(c => {
-                const assets = reportType === 'EWASTE' ? (globalStore[c.id]?.ewaste || []) : (globalStore[c.id]?.assets || []);
-                assets.forEach(a => {
-                    const status = String(a[5]||'Active');
-                    const combinedL = `${a[2]||''} ${a[4]||''}`.toLowerCase();
-                    if(combinedL.includes('monitor')) return;
-                    if(reportType === 'DEFECTIVE' && !status.toLowerCase().includes('defective')) return;
-                    html += `<tr><td><b>${escapeHTML(c.name)}</b></td><td><b>${escapeHTML(a[1])||'Unassigned'}</b><br><small style="color:var(--brand); font-weight:bold;">${escapeHTML(a[0])||''}</small></td><td>${escapeHTML(a[2])||'-'}<br><small>${escapeHTML(a[4])||''}</small></td><td style="font-family:monospace; font-weight:bold;">${escapeHTML(a[3])||escapeHTML(a[2])||'-'}</td><td>${escapeHTML(status)}</td><td>${escapeHTML(a[6])||'-'}<br><small>OM: ${escapeHTML(a[7])||'-'}</small></td></tr>`;
-                });
-            });
-            html += `</tbody></table>`;
-        }
-        container.innerHTML = html;
-    }
-
-    // Asset CRUD Operations
-    function editAsset(index) {
-        const item = globalStore[currentCourt].assets[index];
-        if(!item) return;
-        document.getElementById('editDesig').value = item[0] || '';
-        document.getElementById('editStaff').value = item[1] || '';
-        document.getElementById('editMake').value = item[2] || '';
-        document.getElementById('editOldSerial').value = item[3] || '';
-        document.getElementById('editSerial').value = item[3] || '';
-        document.getElementById('editModel').value = item[4] || '';
-        document.getElementById('editStatus').value = item[5] || 'Active';
-        document.getElementById('editInstallDate').value = formatDateForPicker(item[6]);
-        document.getElementById('editOmNo').value = item[7] || '';
-        document.getElementById('editWStart').value = formatDateForPicker(item[8]);
-        document.getElementById('editWEnd').value = formatDateForPicker(item[9]);
-        document.getElementById('editAmcStart').value = formatDateForPicker(item[10]);
-        document.getElementById('editAmcEnd').value = formatDateForPicker(item[11]);
-
-        const transferSelect = document.getElementById('editTransferCourt');
-        if (transferSelect) {
-            let optionsHtml = `<option value="">-- Do Not Transfer (Keep in ${courtsList.find(c=>c.id===currentCourt)?.name || 'Current Court'}) --</option>`;
-            courtsList.forEach(c => {
-                if (c.id !== currentCourt) optionsHtml += `<option value="${escapeHTML(c.id)}">Transfer to: ${escapeHTML(c.name)}</option>`;
-            });
-            transferSelect.innerHTML = optionsHtml;
         }
 
-        document.getElementById('transferNewDetailsSection').style.display = 'none';
-        document.getElementById('transferNewStaff').value = '';
-        document.getElementById('transferNewDesig').value = '';
-
-        document.getElementById('modalOverlay').style.display = 'block';
-        document.getElementById('editAssetModal').style.display = 'block';
-    }
-
-    function toggleTransferFields(targetCourtId) {
-        const transferSection = document.getElementById('transferNewDetailsSection');
-        if (!transferSection) return;
-        if (targetCourtId && targetCourtId !== currentCourt) {
-            transferSection.style.display = 'block';
-        } else {
-            transferSection.style.display = 'none';
-            document.getElementById('transferNewStaff').value = '';
-            document.getElementById('transferNewDesig').value = '';
-        }
-    }
-
-    function deleteCurrentAsset() {
-        const serial = document.getElementById('editOldSerial').value;
-        if (!serial) return Swal.fire('Error', 'Delete ചെയ്യാൻ Serial Number കണ്ടെത്താനായില്ല!', 'error');
-
-        Swal.fire({
-            title: 'Delete Asset?',
-            html: `Serial Number: <b>${escapeHTML(serial)}</b> ഉള്ള ഈ Asset ഉറപ്പായും ഡിലീറ്റ് ചെയ്യണോ?`,
-            icon: 'warning', showCancelButton: true, confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#64748b', confirmButtonText: 'Yes, Delete It!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                if (globalStore[currentCourt]) {
-                    globalStore[currentCourt].assets = globalStore[currentCourt].assets.filter(a => a[3] !== serial);
-                    refreshSystemState();
-                    renderCourtTables();
-                }
-                closeModals();
-                Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Asset Deleted Successfully!', showConfirmButton: false, timer: 1500});
-                postToScript({ action: "deleteAsset", page: currentCourt, serial: serial });
-            }
-        });
-    }
-
-    function validateSerialInput(inputEl, isEditing = false, oldSerial = '') {
-        const serial = inputEl.value.trim().toUpperCase();
-        if(!serial) { inputEl.classList.remove('duplicate-error'); return true; }
-        if(isEditing && serial === oldSerial.toUpperCase()) { inputEl.classList.remove('duplicate-error'); return true; }
-        if(serialHashMap.has(serial)) { inputEl.classList.add('duplicate-error'); return false; }
-        inputEl.classList.remove('duplicate-error');
-        return true;
-    }
-
-    async function saveEdit() {
-        const oldSerial = document.getElementById('editOldSerial').value;
-        const newSerial = document.getElementById('editSerial').value.trim().toUpperCase();
-        const newStatus = document.getElementById('editStatus').value;
-        const targetCourt = document.getElementById('editTransferCourt').value;
-
-        if(!newSerial) return Swal.fire('Required', 'Serial Number cannot be empty.', 'error');
-        if(!validateSerialInput(document.getElementById('editSerial'), true, oldSerial)) {
-            return Swal.fire('Duplicate Serial Number!', `Serial Number <b>"${escapeHTML(newSerial)}"</b> already exists!`, 'error');
-        }
-
-        let finalStaff = document.getElementById('editStaff').value;
-        let finalDesig = document.getElementById('editDesig').value;
-        const isTransferring = targetCourt && targetCourt !== currentCourt;
-
-        if (isTransferring) {
-            const transStaff = document.getElementById('transferNewStaff').value.trim();
-            const transDesig = document.getElementById('transferNewDesig').value.trim();
-            if (transStaff) finalStaff = transStaff;
-            if (transDesig) finalDesig = transDesig;
-        }
-
-        const newRowData = [
-            finalDesig, finalStaff, document.getElementById('editMake').value, newSerial,
-            document.getElementById('editModel').value, newStatus, document.getElementById('editInstallDate').value,
-            document.getElementById('editOmNo').value, document.getElementById('editWStart').value,
-            document.getElementById('editWEnd').value, document.getElementById('editAmcStart').value,
-            document.getElementById('editAmcEnd').value
-        ];
-
-        if (isTransferring) {
-            if (globalStore[currentCourt]) globalStore[currentCourt].assets = globalStore[currentCourt].assets.filter(a => a[3] !== oldSerial);
-            if (!globalStore[targetCourt]) globalStore[targetCourt] = { assets: [], ewaste: [] };
-            globalStore[targetCourt].assets.push(newRowData);
-            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Transferred with new staff details!', showConfirmButton: false, timer: 1500});
-        } else {
-            if(globalStore[currentCourt]) {
-                if (newStatus === 'Moved to E-Waste') {
-                    globalStore[currentCourt].assets = globalStore[currentCourt].assets.filter(a => a[3] !== oldSerial);
-                    globalStore[currentCourt].ewaste.push([newRowData[2], newRowData[4], newSerial, newRowData[7], new Date().toLocaleDateString('en-IN')]);
-                } else {
-                    const idx = globalStore[currentCourt].assets.findIndex(a => a[3] === oldSerial);
-                    if(idx !== -1) globalStore[currentCourt].assets[idx] = newRowData;
-                }
-            }
-            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Asset Updated!', showConfirmButton: false, timer: 1200});
-        }
-
-        refreshSystemState(); renderCourtTables(); closeModals();
-        postToScript({ action: 'editAsset', page: currentCourt, targetCourt: targetCourt, oldSerial: oldSerial, newDesig: newRowData[0], newStaff: newRowData[1], newMake: newRowData[2], newSerial: newRowData[3], newModel: newRowData[4], newStatus: newRowData[5], newInstallDate: newRowData[6], newOmNo: newRowData[7], wStart: newRowData[8], wEnd: newRowData[9], amcStart: newRowData[10], amcEnd: newRowData[11] });
-    }
-
-    function addDeviceRow(make = '', model = '', serial = '') {
-        const container = document.getElementById('devicesContainer');
-        const rowId = 'dev_' + Date.now() + Math.random().toString(36).substr(2, 4);
-        const html = `
-            <div class="device-row" id="${rowId}">
-                <i class="fa-solid fa-trash remove-device-btn" onclick="removeDeviceRow('${rowId}')"></i>
-                <div class="grid-2">
-                    <div class="form-group" style="margin:0;"><label>Make / Item</label><input type="text" class="dev-make" list="listMakes" value="${escapeHTML(make)}" placeholder="Desktop, Printer, UPS..." oninput="handleSmartSearch(this, 'listMakes', masterDataStore.makes)"></div>
-                    <div class="form-group" style="margin:0;"><label>Model</label><input type="text" class="dev-model" list="listModels" value="${escapeHTML(model)}" placeholder="M2170, Veriton..." oninput="handleSmartSearch(this, 'listModels', masterDataStore.models)"></div>
-                </div>
-                <div class="form-group" style="margin:8px 0 0;"><label>Serial Number (Unique)</label><input type="text" class="dev-serial" list="listSerials" value="${escapeHTML(serial)}" placeholder="Type Serial No" style="font-family:monospace; font-weight:bold;" oninput="validateSerialInput(this); handleSmartSearch(this, 'listSerials', masterDataStore.serials);"></div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-    }
-
-    function removeDeviceRow(rowId) {
-        const el = document.getElementById(rowId);
-        if(el) el.remove();
-    }
-
-    async function saveMultiAssetEntry() {
-        const staff = document.getElementById('inputStaff').value.trim();
-        const desig = document.getElementById('inputDesig').value.trim();
-        const installDate = document.getElementById('inputInstallDate').value;
-        const omNo = document.getElementById('inputOmNo').value.trim();
-        const wStart = document.getElementById('inputWStart').value;
-        const wEnd = document.getElementById('inputWEnd').value;
-        const amcStart = document.getElementById('inputAmcStart').value;
-        const amcEnd = document.getElementById('inputAmcEnd').value;
-
-        const deviceRows = document.querySelectorAll('.device-row');
-        let devices = []; let hasDuplicate = false; let dupSerial = '';
-
-        deviceRows.forEach(row => {
-            const make = row.querySelector('.dev-make').value.trim();
-            const model = row.querySelector('.dev-model').value.trim();
-            const serialInput = row.querySelector('.dev-serial');
-            const serial = serialInput.value.trim().toUpperCase();
-            if(!serial) return;
-            if(!validateSerialInput(serialInput)) { hasDuplicate = true; dupSerial = serial; }
-            devices.push({ make, model, serial });
-        });
-
-        if(devices.length === 0) return Swal.fire('Required', 'Please enter at least one device with Serial Number.', 'error');
-        if(hasDuplicate) return Swal.fire('Duplicate Serial Number!', `Serial Number <b>"${escapeHTML(dupSerial)}"</b> already exists!`, 'error');
-
-        if(!globalStore[currentCourt]) globalStore[currentCourt] = { assets: [], ewaste: [] };
-        devices.forEach(dev => {
-            globalStore[currentCourt].assets.push([
-                desig || '-', staff || '-', dev.make || '-', dev.serial, dev.model || '-', 'Active',
-                installDate || '-', omNo || '-', wStart || '-', wEnd || '-', amcStart || '-', amcEnd || '-'
-            ]);
-        });
-
-        refreshSystemState(); renderCourtTables(); closeModals();
-        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Hardware Allotted!', showConfirmButton: false, timer: 1200});
-        postToScript({ action: 'saveMultiAssets', page: currentCourt, staff, desig, installDate, omNo, devices, wStart, wEnd, amcStart, amcEnd });
-    }
-
-    function openAssetModal() {
-        document.getElementById('inputStaff').value = ""; document.getElementById('inputDesig').value = "";
-        document.getElementById('inputInstallDate').value = ""; document.getElementById('inputOmNo').value = "";
-        document.getElementById('inputWStart').value = ""; document.getElementById('inputWEnd').value = "";
-        document.getElementById('inputAmcStart').value = ""; document.getElementById('inputAmcEnd').value = "";
-        document.getElementById('devicesContainer').innerHTML = ""; addDeviceRow();
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('assetModal').style.display = 'block';
-    }
-
-    function openMasterModal(category) {
-        document.getElementById('masterCategory').value = category;
-        const titleEl = document.getElementById('masterModalTitle');
-        const inputFieldContainer = document.getElementById('fieldMasterValue');
-        const courtFieldContainer = document.getElementById('fieldsNewCourt');
-        const labelEl = document.getElementById('lblMasterInput');
-        
-        document.getElementById('masterValue').value = ""; document.getElementById('courtIdInput').value = "";
-        document.getElementById('courtNameInput').value = ""; document.getElementById('courtDescInput').value = "";
-        document.getElementById('courtGroupInput').value = "";
-
-        if(category === 'Court') {
-            titleEl.innerHTML = `<i class="fa-solid fa-gavel" style="color:var(--brand);"></i> Add New Court Jurisdiction`;
-            inputFieldContainer.style.display = 'none'; courtFieldContainer.style.display = 'block';
-        } else {
-            inputFieldContainer.style.display = 'block'; courtFieldContainer.style.display = 'none';
-            if(category === 'Designation') { titleEl.innerHTML = `<i class="fa-solid fa-user-tie" style="color:var(--brand);"></i> Add Designations / Seats (Bulk Excel Import)`; labelEl.innerText = "Designation Name(s)"; }
-            else if(category === 'Make') { titleEl.innerHTML = `<i class="fa-solid fa-industry" style="color:var(--brand);"></i> Add Hardware Brands (Bulk Excel Import)`; labelEl.innerText = "Brand Name(s)"; }
-            else if(category === 'Model') { titleEl.innerHTML = `<i class="fa-solid fa-laptop" style="color:var(--brand);"></i> Add Hardware Models (Bulk Excel Import)`; labelEl.innerText = "Model Name(s)"; }
-            else if(category === 'Serial') { titleEl.innerHTML = `<i class="fa-solid fa-barcode" style="color:var(--brand);"></i> Add Serial Numbers (Bulk Excel Import)`; labelEl.innerText = "Serial Number(s)"; }
-        }
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('masterModal').style.display = 'block';
-    }
-
-    async function saveMasterEntry() {
-        const cat = document.getElementById('masterCategory').value;
-        if(cat === 'Court') {
-            const courtId = document.getElementById('courtIdInput').value.trim().replace(/\s+/g, '');
-            const courtName = document.getElementById('courtNameInput').value.trim();
-            const courtDesc = document.getElementById('courtDescInput').value.trim();
-            const courtGroup = document.getElementById('courtGroupInput').value.trim();
-            if(!courtId || !courtName) return Swal.fire('Required', 'Court ID and Name are required.', 'error');
-
-            const payload = { action: 'saveMaster', category: cat, courtId, courtName, courtDesc: courtDesc || 'Court Division', courtGroup: courtGroup || '' };
-            courtsList.push({ id: courtId, name: courtName, desc: payload.courtDesc, group: payload.courtGroup });
-            refreshSystemState(); postToScript(payload);
-        } else {
-            const rawVal = document.getElementById('masterValue').value.trim();
-            if(!rawVal) return Swal.fire('Required', 'Please enter a value or paste items.', 'error');
-            const items = rawVal.split(/[\n,]+/).map(i => i.trim()).filter(i => i.length > 0);
-            items.forEach(val => {
-                if(cat === 'Designation') masterDataStore.designations.push(val);
-                if(cat === 'Make') masterDataStore.makes.push(val);
-                if(cat === 'Model') masterDataStore.models.push(val);
-                if(cat === 'Serial') masterDataStore.serials.push(val);
-            });
-            saveLocalCache();
-            populateDatalist('listDesignations', masterDataStore.designations);
-            populateDatalist('listMakes', masterDataStore.makes);
-            populateDatalist('listModels', masterDataStore.models);
-            populateDatalist('listSerials', masterDataStore.serials);
-            postToScript({ action: 'saveMaster', category: cat, values: items });
-        }
-        closeModals();
-        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Master Data Saved Successfully!', showConfirmButton: false, timer: 1200});
-    }
-
-    function openGroupManageModal() {
-        const container = document.getElementById('courtGroupListContainer');
-        container.innerHTML = courtsList.map(c => `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--border); gap:10px;">
-                <div style="flex:1;">
-                    <strong style="font-size:0.85rem;">${escapeHTML(c.name)}</strong><br>
-                    <small style="color:var(--text-sub);">Code: ${escapeHTML(c.id)}</small>
-                </div>
-                <div style="width:200px;">
-                    <input type="text" id="grp_input_${escapeHTML(c.id)}" value="${escapeHTML(c.group || '')}" placeholder="Type Group Tag..." style="width:100%; padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:0.8rem;">
-                </div>
-                <button class="btn btn-sm btn-primary" onclick="saveIndividualCourtGroup('${escapeHTML(c.id)}')"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-            </div>
-        `).join('');
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('groupManageModal').style.display = 'block';
-    }
-
-    async function saveIndividualCourtGroup(courtId) {
-        const val = document.getElementById(`grp_input_${courtId}`).value.trim();
-        const court = courtsList.find(c => c.id === courtId);
-        if(court) {
-            court.group = val; refreshSystemState();
-            Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: `Group updated for ${escapeHTML(court.name)}!`, showConfirmButton: false, timer: 1200});
-            postToScript({ action: 'updateCourtGroup', courtId: court.id, courtName: court.name, courtDesc: court.desc, groupName: val });
-        }
-    }
-
-    function backupSystemData() {
-        const backupObj = { exportDate: new Date().toISOString(), courtsList, globalStore, masterDataStore };
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
-        const downloadAnchor = document.createElement('a');
-        downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `DistrictCourt_IT_Backup_${new Date().toISOString().split('T')[0]}.json`);
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click(); downloadAnchor.remove();
-    }
-
-    function exportToExcel(tableId, fileName) {
-        const wb = XLSX.utils.table_to_book(document.getElementById(tableId || 'tableLiveAssets'), {sheet: 'Report'});
-        XLSX.writeFile(wb, `${fileName || 'Court_Report'}.xlsx`);
-    }
-
-    // Staff Management logic
-    function openStaffManageModal() {
-        if (!currentCourt) return Swal.fire('Notice', 'ദയവായി ആദ്യം ഏതെങ്കിലും ഒരു കോർട്ട് തിരഞ്ഞെടുക്കുക.', 'info');
-        const container = document.getElementById('staffPostsContainer');
-        container.innerHTML = '';
-        populateDatalist('listDesignations', masterDataStore.designations || []);
-        const courtStaffData = globalStore[currentCourt]?.staffStrength || [];
-        if (courtStaffData.length > 0) {
-            courtStaffData.forEach(item => { addStaffPostRow(item.desig, item.count); });
-        } else {
-            addStaffPostRow('', 1);
-        }
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('staffManageModal').style.display = 'block';
-    }
-
-    function addStaffPostRow(desig = '', count = 1) {
-        const container = document.getElementById('staffPostsContainer');
-        const rowId = 'staff_' + Date.now() + Math.random().toString(36).substr(2, 4);
-        const html = `
-            <div class="device-row staff-post-row" id="${rowId}" style="padding:12px; margin-bottom:10px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; position:relative;">
-                <i class="fa-solid fa-trash remove-device-btn" onclick="removeStaffPostRow('${rowId}')" title="Remove Post" style="position:absolute; right:12px; top:12px; color:var(--danger); cursor:pointer;"></i>
-                <div class="grid-2">
-                    <div class="form-group" style="margin:0;">
-                        <label>Designation / Sanctioned Post *</label>
-                        <input type="text" class="staff-desig" value="${escapeHTML(desig)}" list="listDesignations" placeholder="Select or type Designation..." 
-                            onfocus="handleSmartSearch(this, 'listDesignations', masterDataStore.designations)" 
-                            oninput="handleSmartSearch(this, 'listDesignations', masterDataStore.designations)">
-                    </div>
-                    <div class="form-group" style="margin:0;">
-                        <label>Sanctioned Strength (Count) *</label>
-                        <input type="number" class="staff-count" value="${count}" min="1" placeholder="Post count">
-                    </div>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', html);
-    }
-
-    function removeStaffPostRow(rowId) {
-        const el = document.getElementById(rowId); if (el) el.remove();
-    }
-
-    async function saveStaffStrengthData() {
-        const rows = document.querySelectorAll('#staffPostsContainer .staff-post-row');
-        let staffPosts = [];
-        rows.forEach(row => {
-            const desigInput = row.querySelector('.staff-desig');
-            const countInput = row.querySelector('.staff-count');
-            const desig = desigInput ? desigInput.value.trim() : '';
-            const count = countInput ? parseInt(countInput.value.trim(), 10) || 0 : 0;
-            if (desig && count > 0) staffPosts.push({ desig, count });
-        });
-        if (staffPosts.length === 0) return Swal.fire('Required', 'കുറഞ്ഞത് ഒരു Valid Post എങ്കിലും എൻട്രി ചെയ്യുക.', 'error');
-        if (!globalStore[currentCourt]) globalStore[currentCourt] = { assets: [], ewaste: [], staffStrength: [] };
-        globalStore[currentCourt].staffStrength = staffPosts;
-        saveLocalCache(); closeModals();
-        Swal.fire({toast: true, position: 'bottom-end', icon: 'success', title: 'Staff Strength Saved Successfully!', showConfirmButton: false, timer: 1500});
-        postToScript({ action: 'saveStaffStrength', page: currentCourt, staffPosts: staffPosts });
-    }
-
-    // QR Logic
-    function generateAssetQR(index) {
-        const item = globalStore[currentCourt]?.assets[index];
-        if (!item) return;
-
-        const desig = item[0] || '-'; const staff = item[1] || '-'; const make = item[2] || '';
-        const serial = item[3] || ''; const model = item[4] || ''; const status = item[5] || 'Active';
-        const installDate = formatDateForDisplay(item[6]); const omNo = item[7] || '-';
-        const wStart = formatDateForDisplay(item[8]); const wEnd = formatDateForDisplay(item[9]);
-        const amcStart = formatDateForDisplay(item[10]); const amcEnd = formatDateForDisplay(item[11]);
-        const coverageStatus = getQRCoverageStatus(item[9], item[11]);
-
-        const courtObj = courtsList.find(c => c.id === currentCourt);
-        const courtName = courtObj ? courtObj.name : 'District Court Kozhikode';
-
-        const qrFullText = `DISTRICT COURT KOZHIKODE\nCourt: ${courtName}\nSeat: ${desig} | Staff: ${staff}\nItem: ${make} ${model}\nS/N: ${serial} | Status: ${status}\nInstall: ${installDate} | OM: ${omNo}\n----------------------------\nWarranty: ${wStart} to ${wEnd}\nAMC: ${amcStart} to ${amcEnd}\nCoverage: ${coverageStatus}`;
-        
-        document.getElementById('qrCourtLabel').innerText = courtName;
-        document.getElementById('qrSerialLabel').innerText = `S/N: ${serial}`;
-        document.getElementById('qrDetailLabel').innerText = `${make} ${model}`;
-
-        const qrContainer = document.getElementById('qrcodeCanvas');
-        qrContainer.innerHTML = '';
-        try { new QRCode(qrContainer, { text: qrFullText, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L }); } catch(err) { console.error(err); }
-
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('qrModal').style.display = 'block';
-    }
-
-    function printQRSticker() {
-        const printContent = document.getElementById('qrPrintArea').outerHTML;
-        const win = window.open('', '', 'width=400,height=400');
-        win.document.write(`<html><head><title>Print QR Label</title><style>body { font-family: sans-serif; text-align: center; padding: 20px; } div { margin: 0 auto; }</style></head><body onload="window.print(); window.close();">${printContent}</body></html>`);
-        win.document.close();
-    }
-
-    function openQRScanner() {
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('qrScannerModal').style.display = 'block';
-        html5QrcodeScanner = new Html5QrcodeScanner("qrReader", { fps: 10, qrbox: 220 });
-        html5QrcodeScanner.render((scannedText) => {
-            closeQRScanner();
-            document.getElementById('courtSearchInput').value = scannedText; filterCourts();
-            Swal.fire({ toast: true, position: 'bottom-end', icon: 'success', title: `Scanned Serial: ${scannedText}`, showConfirmButton: false, timer: 1500 });
-        }, (error) => {});
-    }
-
-    function closeQRScanner() {
-        if (html5QrcodeScanner) html5QrcodeScanner.clear().catch(error => console.error(error));
-        document.getElementById('qrScannerModal').style.display = 'none';
-    }
-
-    function openBulkCourtQRModal() {
-        const assets = globalStore[currentCourt]?.assets || [];
-        if (!assets || assets.length === 0) return Swal.fire('Notice', 'ഈ കോർട്ടിൽ QR ഉണ്ടാക്കാൻ ഹാർഡ്‌വെയറുകൾ ഒന്നും ലഭ്യമല്ല.', 'info');
-
-        const container = document.getElementById('bulkQrContainer');
-        container.innerHTML = '';
-
-        const courtObj = courtsList.find(c => c.id === currentCourt);
-        const courtName = courtObj ? courtObj.name : 'District Court Kozhikode';
-
-        assets.forEach((a, idx) => {
-            const desig = a[0] || '-'; const staff = a[1] || '-'; const make = a[2] || '';
-            const serial = a[3] || ''; const model = a[4] || ''; const status = a[5] || 'Active';
-            const installDate = formatDateForDisplay(a[6]); const omNo = a[7] || '-';
-            const wStart = formatDateForDisplay(a[8]); const wEnd = formatDateForDisplay(a[9]);
-            const amcStart = formatDateForDisplay(a[10]); const amcEnd = formatDateForDisplay(a[11]);
-            
-            if (!serial || serial === '-') return;
-            const coverageStatus = getQRCoverageStatus(a[9], a[11]);
-            const cardId = `bulk_qr_card_${idx}`; const qrCanvasId = `bulk_qr_canvas_${idx}`;
-            const qrFullText = `DISTRICT COURT KOZHIKODE\nCourt: ${courtName}\nSeat: ${desig} | Staff: ${staff}\nItem: ${make} ${model}\nS/N: ${serial} | Status: ${status}\nInstall: ${installDate} | OM: ${omNo}\n----------------------------\nWarranty: ${wStart} to ${wEnd}\nAMC: ${amcStart} to ${amcEnd}\nCoverage: ${coverageStatus}`;
-
-            const cardHtml = `
-                <div id="${cardId}" class="qr-sticker-box" style="background:#ffffff; border:1.5px dashed #334155; border-radius:8px; padding:10px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-                    <div style="font-size:0.68rem; font-weight:800; text-transform:uppercase; color:#0f172a; margin-bottom:4px; line-height:1.1;">${escapeHTML(courtName)}</div>
-                    <div id="${qrCanvasId}" style="display:flex; justify-content:center; margin:6px 0;"></div>
-                    <div style="font-family:monospace; font-weight:800; font-size:0.85rem; color:#000;">SN: ${escapeHTML(serial)}</div>
-                    <div style="font-size:0.7rem; color:#475569; margin-top:2px; font-weight:600;">${escapeHTML(make)} ${escapeHTML(model)}</div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', cardHtml);
-
-            setTimeout(() => {
-                const qrElement = document.getElementById(qrCanvasId);
-                if (qrElement) {
-                    qrElement.innerHTML = '';
-                    try { new QRCode(qrElement, { text: qrFullText, width: 110, height: 110, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.L }); } 
-                    catch (err) { console.error(err); }
-                }
-            }, 80);
-        });
-
-        document.getElementById('modalOverlay').style.display = 'block'; document.getElementById('bulkQrModal').style.display = 'block';
-    }
-
-    function printBulkQRSheet() {
-        const container = document.getElementById('bulkQrContainer');
-        if (!container || container.children.length === 0) return;
-        const printWin = window.open('', '', 'width=900,height=700');
-        printWin.document.write(`<html><head><title>Bulk QR Stickers</title><style>@page { size: A4; margin: 10mm; } body { font-family: sans-serif; background: #fff; margin: 0; padding: 0; } .printable-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10mm 8mm; } .qr-sticker-box { background: #fff !important; border: 1px dashed #000 !important; border-radius: 6px; padding: 8px; text-align: center; page-break-inside: avoid; } img { display: block; margin: 0 auto; }</style></head><body onload="setTimeout(() => { window.print(); window.close(); }, 500);"><div class="printable-grid">${container.innerHTML}</div></body></html>`);
-        printWin.document.close();
-    }
-</script>
-
+        function escapeHTML(str) { return String(str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+    </script>
 </body>
 </html>
