@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wedding Registry Pro 2.0</title>
+  <title>wedding.</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -11,276 +11,364 @@
     
     * {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     
     html, body {
       height: 100%;
       height: 100dvh;
       overflow: hidden;
+      background-color: #F3F6F3;
       overscroll-behavior: none;
-      -webkit-tap-highlight-color: transparent;
     }
 
     .feed-scroll::-webkit-scrollbar { width: 3px; }
-    .feed-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+    .feed-scroll::-webkit-scrollbar-thumb { background: #d1ded1; border-radius: 99px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Pulsing animation for listening voice indicator */
-    .mic-recording {
-      animation: mic-pulse 1.3s cubic-bezier(0.25, 0.8, 0.25, 1) infinite;
+    .mic-live-pulse {
+      animation: live-pulse 1.3s infinite;
     }
-    @keyframes mic-pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    @keyframes live-pulse {
+      0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+      70% { transform: scale(1.04); box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+      100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
     }
   </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-900 h-full flex flex-col select-none antialiased">
+<body class="text-slate-900 h-full flex flex-col select-none antialiased">
 
-  <!-- 1. Top Sleek App Bar -->
-  <header class="bg-white/80 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 shrink-0 flex justify-between items-center z-30">
-    <div class="flex items-center gap-2.5">
-      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-sm shadow-indigo-200">
-        <i class="fa-solid fa-gift text-xs"></i>
-      </div>
-      <div>
-        <h1 class="text-[13px] font-bold tracking-tight text-slate-900 leading-none">Wedding Registry</h1>
-        <p class="text-[10px] font-semibold text-indigo-600 mt-0.5">Live Manager</p>
-      </div>
+  <!-- TOP HEADER (buybest. style) -->
+  <header class="bg-[#F3F6F3] px-5 pt-3 pb-2 shrink-0 flex justify-between items-center z-30">
+    <div class="flex items-center gap-1.5">
+      <span class="text-2xl font-black tracking-tight text-[#13382B]">wedding<span class="text-emerald-600">.</span></span>
     </div>
 
-    <!-- Quick Tool Actions -->
-    <div class="flex items-center gap-1.5">
-      <!-- Tally Counter Button -->
-      <button id="openTallyBtn" class="bg-amber-50 hover:bg-amber-100 border border-amber-200/80 text-amber-900 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 shadow-xs active:scale-95 transition">
-        <i class="fa-solid fa-calculator text-[10px] text-amber-600"></i>
-        <span>Tally</span>
+    <div class="flex items-center gap-2">
+      <!-- Quick Add Pill Button -->
+      <button onclick="openAddModal()" class="bg-[#DDF2D8] hover:bg-[#cdebc7] text-[#13382B] text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 shadow-2xs active:scale-95 transition">
+        <i class="fa-solid fa-plus text-[10px]"></i>
+        <span>Add gift</span>
       </button>
 
-      <!-- Privacy Eye Button -->
-      <button id="togglePrivacyBtn" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs active:scale-95 transition">
-        <i id="privacyIcon" class="fa-solid fa-eye"></i>
-      </button>
-
-      <!-- Sync Status Button -->
-      <button id="syncNowBtn" class="bg-slate-100 border border-slate-200 text-slate-700 px-2 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 shadow-xs active:scale-95 transition">
-        <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-        <span id="syncText">Sync</span>
-      </button>
-
-      <!-- Excel Export Button -->
-      <button id="exportCsvBtn" class="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 flex items-center justify-center text-emerald-600 text-xs active:scale-95 transition">
-        <i class="fa-solid fa-file-excel"></i>
+      <!-- Sync Status Indicator -->
+      <button id="syncNowBtn" title="Sync Sheet" class="w-9 h-9 rounded-2xl bg-white border border-[#E3ECE2] flex items-center justify-center text-slate-600 shadow-2xs active:scale-95 transition">
+        <span id="syncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
       </button>
     </div>
   </header>
 
-  <!-- Voice & Status Toast Bar -->
-  <div id="toast" class="hidden shrink-0 bg-slate-900 text-white text-[11px] px-4 py-2 text-center font-medium transition flex items-center justify-center gap-2 shadow-md">
+  <!-- NOTIFICATION TOAST -->
+  <div id="toast" class="hidden shrink-0 bg-[#13382B] text-white text-[11px] px-4 py-2 text-center font-medium transition flex items-center justify-center gap-2 shadow-md">
     <span id="toastMsg"></span>
   </div>
 
-  <!-- 2. Fixed Top Dashboard (Fintech Hero Card + Filters) -->
-  <div class="max-w-md mx-auto w-full px-3.5 pt-3 pb-2 shrink-0 space-y-2.5 z-20">
-    
-    <!-- Fintech Balance Hero Card -->
-    <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-white rounded-2xl p-4 shadow-xl shadow-slate-900/10 border border-slate-700/60 relative overflow-hidden">
-      <div class="absolute -right-3 -bottom-4 text-white/5 text-8xl font-black">₹</div>
+  <!-- MAIN CONTENT CONTAINER (Switchable Tabs) -->
+  <main class="flex-1 overflow-y-auto overscroll-contain feed-scroll px-4 pt-1 pb-24 max-w-md mx-auto w-full">
+
+    <!-- ============================================== -->
+    <!-- TAB 1: HOME (Dashboard Preview)               -->
+    <!-- ============================================== -->
+    <div id="tab-home" class="space-y-4">
       
-      <div class="flex justify-between items-start">
-        <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Total Collection</span>
-          <p id="totalAmount" class="text-2xl font-black tracking-tight text-white mt-0.5">₹ 0</p>
-        </div>
-        <div class="text-right">
-          <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Guests</span>
-          <p id="totalCount" class="text-xl font-extrabold text-indigo-300 mt-0.5">0</p>
-        </div>
-      </div>
-
-      <!-- Cash vs UPI Breakdown -->
-      <div class="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-slate-700/60 text-xs">
-        <div class="flex items-center gap-2 bg-slate-800/60 rounded-xl px-2.5 py-1.5 border border-slate-700/40">
-          <span class="text-sm">💵</span>
+      <!-- Forest Green Hero Card (buybest. exact style) -->
+      <div class="bg-[#13382B] text-white rounded-3xl p-5 shadow-lg shadow-[#13382B]/10 relative overflow-hidden">
+        <div class="flex justify-between items-start">
           <div>
-            <p class="text-[9px] font-bold text-slate-400 uppercase">Cash in Hand</p>
-            <p class="font-extrabold text-emerald-400 text-xs mt-0.5">₹ <span id="cashTotal">0</span></p>
+            <p class="text-[10px] tracking-widest font-extrabold text-[#95c5b0] uppercase">WEDDING REGISTRY</p>
+            <h2 class="text-2xl font-black tracking-tight mt-1 leading-tight">Total gifts<br>collected.</h2>
+          </div>
+          <div class="bg-white/10 backdrop-blur-xs p-2.5 rounded-2xl text-center">
+            <p class="text-[9px] font-bold text-emerald-200 uppercase">Guests</p>
+            <p id="homeGuestCount" class="text-lg font-black text-white leading-none mt-0.5">0</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 bg-slate-800/60 rounded-xl px-2.5 py-1.5 border border-slate-700/40">
-          <span class="text-sm">📱</span>
-          <div>
-            <p class="text-[9px] font-bold text-slate-400 uppercase">UPI / GPay</p>
-            <p class="font-extrabold text-violet-400 text-xs mt-0.5">₹ <span id="upiTotal">0</span></p>
+        <!-- Total Amount -->
+        <div class="mt-4 pt-3 border-t border-white/10">
+          <p class="text-3xl font-black tracking-tight text-[#DDF2D8]" id="homeTotalAmount">₹ 0</p>
+          <div class="flex gap-2 mt-2">
+            <span class="text-[11px] font-semibold text-emerald-200/90 bg-white/10 px-2.5 py-1 rounded-xl">💵 Cash: ₹<b id="homeCashTotal">0</b></span>
+            <span class="text-[11px] font-semibold text-emerald-200/90 bg-white/10 px-2.5 py-1 rounded-xl">📱 UPI: ₹<b id="homeUpiTotal">0</b></span>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Search & Filter Controls -->
-    <div class="space-y-1.5">
-      <div class="relative">
-        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-        <input type="text" id="searchInput" placeholder="Search guest name or category..."
-               class="w-full bg-white pl-8 pr-3 py-1.5 rounded-xl text-xs text-slate-800 placeholder-slate-400 border border-slate-200/80 shadow-xs focus:outline-none focus:border-indigo-500 transition">
-      </div>
-
-      <div class="flex items-center gap-1 overflow-x-auto text-[11px] no-scrollbar py-0.5">
-        <button class="filter-chip px-3 py-1 rounded-lg font-bold bg-slate-900 text-white shadow-xs shrink-0" data-filter="all">All</button>
-        <button class="filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0" data-filter="mode-cash">💵 Cash</button>
-        <button class="filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0" data-filter="mode-upi">📱 UPI</button>
-        <button class="filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0" data-filter="Friends">Friends</button>
-        <button class="filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0" data-filter="Relatives">Relatives</button>
-        <button class="filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0" data-filter="Office">Office</button>
-      </div>
-    </div>
-
-    <!-- Entries Counter -->
-    <div class="flex justify-between items-center px-1">
-      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Entries Feed</span>
-      <span id="feedCounter" class="text-[10px] font-bold text-slate-500">0 items</span>
-    </div>
-
-  </div>
-
-  <!-- 3. Scrollable Transaction Feed -->
-  <main class="flex-1 overflow-y-auto overscroll-contain feed-scroll px-3.5 max-w-md mx-auto w-full z-10">
-    <div id="recordsContainer" class="space-y-2 pb-32"></div>
-  </main>
-
-  <!-- 4. Fixed Modern Bottom Input Dock -->
-  <footer class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200/90 p-3 z-30 shadow-2xl">
-    <div class="max-w-md mx-auto space-y-2">
-
-      <!-- Realtime Manglish Suggestion Bar -->
-      <div id="suggestionBar" class="hidden flex items-center gap-1.5 bg-indigo-50/90 border border-indigo-200/80 px-2 py-1 rounded-xl shadow-xs">
-        <span class="text-[10px] font-bold text-indigo-700 shrink-0">Did you mean:</span>
-        <div id="suggestionChips" class="flex gap-1 overflow-x-auto no-scrollbar"></div>
-      </div>
-
-      <!-- Mode (Cash vs UPI) + Category Selector + Quick Amounts -->
-      <div class="flex items-center justify-between gap-1 text-xs">
-        
-        <!-- Cash vs UPI Pill Toggle -->
-        <div class="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200/80">
-          <button type="button" id="modeCashBtn" class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-emerald-700 shadow-xs transition">💵 Cash</button>
-          <button type="button" id="modeUpiBtn" class="px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-violet-700 transition">📱 UPI</button>
-        </div>
-
-        <!-- Category Dropdown -->
-        <select id="categorySelect" class="bg-slate-100 text-slate-700 text-[11px] font-bold py-1 px-2.5 rounded-xl border border-slate-200/80 outline-none">
-          <option value="General">General</option>
-          <option value="Relatives">Relatives</option>
-          <option value="Friends">Friends</option>
-          <option value="Office">Office</option>
-          <option value="Family">Family</option>
-        </select>
-
-        <!-- Quick Amount Pills -->
-        <div class="flex gap-1">
-          <button type="button" class="quick-amt px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 border border-slate-200/80 text-slate-700 font-bold text-[11px] active:scale-95 transition" data-val="500">₹500</button>
-          <button type="button" class="quick-amt px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 border border-slate-200/80 text-slate-700 font-bold text-[11px] active:scale-95 transition" data-val="1000">₹1000</button>
-          <button type="button" class="quick-amt px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 border border-slate-200/80 text-slate-700 font-bold text-[11px] active:scale-95 transition" data-val="2000">₹2000</button>
-        </div>
-      </div>
-
-      <!-- Input Row (Voice + Name + Amount + Add Button) -->
-      <form id="entryForm" class="space-y-1.5">
-        <div class="flex gap-2">
-          
-          <!-- Live Continuous Voice Button -->
-          <button type="button" id="micBtn" title="Speak in Malayalam"
-                  class="w-11 h-11 bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-200 transition">
-            <i id="micIcon" class="fa-solid fa-microphone text-sm"></i>
+        <!-- Hero Actions (Scan / Enter style) -->
+        <div class="mt-5 space-y-2">
+          <button onclick="openAddModal(true)" class="w-full bg-[#DDF2D8] text-[#13382B] font-extrabold text-xs py-3 px-4 rounded-2xl flex items-center justify-between shadow-sm active:scale-95 transition">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-microphone text-sm"></i>
+              <span>Voice record name</span>
+            </div>
+            <i class="fa-solid fa-arrow-right text-xs"></i>
           </button>
-          
-          <input type="text" id="nameInput" required placeholder="Guest Name (Speak or Manglish)..."
-                 class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
-        </div>
 
-        <div class="flex gap-2">
-          <div class="relative w-2/3">
-            <span class="absolute left-3.5 top-2 text-slate-400 font-bold text-xs">₹</span>
-            <input type="number" id="amountInput" required placeholder="Amount" inputmode="numeric"
-                   class="w-full bg-slate-50 border border-slate-200/90 rounded-2xl pl-8 pr-3 py-2 text-sm font-extrabold text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition">
+          <div class="grid grid-cols-2 gap-2 pt-1">
+            <button onclick="openAddModal(false)" class="text-center font-bold text-xs py-2 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
+              Enter manually
+            </button>
+            <button onclick="switchTab('analytics')" class="text-center font-bold text-xs py-2 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
+              Cash tally 🧮
+            </button>
           </div>
+        </div>
+      </div>
 
-          <button type="submit" id="saveBtn" 
-                  class="w-1/3 bg-slate-900 active:bg-slate-800 text-white font-bold rounded-2xl text-xs shadow-md shadow-slate-900/20 flex items-center justify-center gap-1.5 active:scale-95 transition">
-            <span>Add</span>
+      <!-- Recent Entries Card (Needs review style) -->
+      <div class="space-y-2">
+        <div class="flex justify-between items-center px-1">
+          <h3 class="text-base font-extrabold text-[#13382B] flex items-center gap-2">
+            <span>Recent entries</span>
+            <span id="homeRecentBadge" class="bg-[#FFE8CC] text-[#B85C00] text-[10px] font-black px-2 py-0.5 rounded-full">0</span>
+          </h3>
+          <button onclick="switchTab('history')" class="text-xs font-bold text-[#13382B] flex items-center gap-1">
+            <span>View all</span>
             <i class="fa-solid fa-arrow-right text-[10px]"></i>
           </button>
         </div>
-      </form>
+
+        <div id="homeRecentFeed" class="bg-white rounded-3xl p-2 border border-[#E3ECE2] shadow-2xs divide-y divide-slate-100">
+          <div class="p-6 text-center text-slate-400 text-xs font-semibold">No gifts recorded yet</div>
+        </div>
+      </div>
 
     </div>
-  </footer>
 
-  <!-- MODAL 1: Cash Denomination Calculator (Tally) -->
-  <div id="tallyModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-4 space-y-3.5 border border-slate-100">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="font-bold text-slate-900 text-sm flex items-center gap-1.5">
-          <i class="fa-solid fa-calculator text-indigo-600"></i> Cash Denomination Tally
-        </h3>
-        <button id="closeTallyBtn" class="text-slate-400 hover:text-slate-700 p-1 text-base">✕</button>
+    <!-- ============================================== -->
+    <!-- TAB 2: HISTORY (Full Ledger)                  -->
+    <!-- ============================================== -->
+    <div id="tab-history" class="hidden space-y-3.5">
+      <div>
+        <h2 class="text-2xl font-black text-[#13382B] tracking-tight">Gift history</h2>
+        <p class="text-xs font-semibold text-slate-500 mt-0.5">Search and review every wedding gift.</p>
       </div>
 
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹500 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="500" placeholder="0">
+      <!-- Search Box with buybest. style -->
+      <div class="flex gap-1.5">
+        <div class="relative flex-1">
+          <input type="text" id="searchInput" placeholder="Search guests..."
+                 class="w-full bg-white pl-4 pr-3 py-2.5 rounded-2xl text-xs font-semibold text-slate-800 placeholder-slate-400 border border-[#E3ECE2] focus:outline-none focus:border-[#13382B]">
         </div>
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹200 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="200" placeholder="0">
-        </div>
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹100 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="100" placeholder="0">
-        </div>
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹50 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="50" placeholder="0">
-        </div>
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹20 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="20" placeholder="0">
-        </div>
-        <div class="flex items-center gap-1 bg-slate-50 p-2 rounded-xl border border-slate-200/80">
-          <span class="font-bold text-slate-700 w-10">₹10 ×</span>
-          <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="10" placeholder="0">
-        </div>
+        <button id="searchBtn" class="bg-[#DDF2D8] text-[#13382B] px-4 py-2.5 rounded-2xl text-xs font-extrabold active:scale-95 transition">
+          Search
+        </button>
       </div>
 
-      <div id="tallyBanner" class="p-3 rounded-2xl text-xs space-y-1 bg-slate-50 border border-slate-200">
-        <div class="flex justify-between">
-          <span class="text-slate-500 font-medium">Counted Physical Cash:</span>
-          <span id="countedCashText" class="font-black text-slate-900">₹ 0</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="text-slate-500 font-medium">Registry Expected Cash:</span>
-          <span id="expectedCashText" class="font-bold text-slate-700">₹ 0</span>
-        </div>
-        <div id="tallyStatusText" class="text-center font-bold pt-1 text-slate-600">Enter note counts to compare</div>
+      <!-- Category & Mode Chips -->
+      <div class="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar py-0.5">
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-extrabold bg-[#13382B] text-white shadow-2xs shrink-0" data-filter="all">All</button>
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0" data-filter="mode-cash">💵 Cash</button>
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0" data-filter="mode-upi">📱 UPI</button>
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0" data-filter="Friends">Friends</button>
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0" data-filter="Relatives">Relatives</button>
+        <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0" data-filter="Office">Office</button>
       </div>
 
-      <div class="flex gap-2">
-        <button id="resetTallyBtn" class="w-1/2 py-2.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl">Reset</button>
-        <button id="saveTallyCloseBtn" class="w-1/2 py-2.5 text-xs font-bold bg-slate-900 text-white rounded-xl">Done</button>
+      <!-- History Feed Cards (Dove Bar / Mini Square style) -->
+      <div id="historyFeed" class="space-y-2.5">
+        <!-- Injected dynamically -->
       </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 3: SPENDING & TALLY                        -->
+    <!-- ============================================== -->
+    <div id="tab-analytics" class="hidden space-y-4">
+      <div>
+        <h2 class="text-2xl font-black text-[#13382B] tracking-tight">Cash & Tally</h2>
+        <p class="text-xs font-semibold text-slate-500 mt-0.5">Reconcile physical envelopes with register.</p>
+      </div>
+
+      <!-- Tally Box -->
+      <div class="bg-white rounded-3xl p-4 border border-[#E3ECE2] space-y-3 shadow-2xs">
+        <h3 class="text-xs font-extrabold text-[#13382B] uppercase tracking-wider">Physical Currency Count</h3>
+        
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹500 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="500" placeholder="0">
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹200 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="200" placeholder="0">
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹100 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="100" placeholder="0">
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹50 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="50" placeholder="0">
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹20 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="20" placeholder="0">
+          </div>
+          <div class="flex items-center gap-1.5 bg-[#F8FAF8] p-2 rounded-xl border border-slate-200/70">
+            <span class="font-extrabold text-slate-700 w-11">₹10 ×</span>
+            <input type="number" class="denom-input w-full bg-white border px-1.5 py-1 rounded-lg text-center font-bold" data-val="10" placeholder="0">
+          </div>
+        </div>
+
+        <!-- Result Banner -->
+        <div id="tallyBanner" class="p-3.5 rounded-2xl text-xs space-y-1.5 bg-[#F3F6F3] border border-slate-200">
+          <div class="flex justify-between">
+            <span class="text-slate-500 font-medium">Counted Physical Cash:</span>
+            <span id="countedCashText" class="font-black text-slate-900">₹ 0</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-slate-500 font-medium">Registry Expected Cash:</span>
+            <span id="expectedCashText" class="font-bold text-slate-700">₹ 0</span>
+          </div>
+          <div id="tallyStatusText" class="text-center font-extrabold pt-1 text-slate-700">Enter note counts to compare</div>
+        </div>
+
+        <button id="resetTallyBtn" class="w-full py-2.5 text-xs font-bold bg-[#F3F6F3] text-slate-700 rounded-xl hover:bg-slate-200 transition">
+          Reset note counts
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- TAB 4: SETTINGS & TOOLS                        -->
+    <!-- ============================================== -->
+    <div id="tab-settings" class="hidden space-y-4">
+      <div>
+        <h2 class="text-2xl font-black text-[#13382B] tracking-tight">Sync & Tools</h2>
+        <p class="text-xs font-semibold text-slate-500 mt-0.5">Manage Google Sheets & backups.</p>
+      </div>
+
+      <div class="bg-white rounded-3xl p-4 border border-[#E3ECE2] space-y-3">
+        
+        <!-- Google Sheet Status -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <p class="text-xs font-bold text-slate-800">Google Sheet Connection</p>
+            <p id="settingsSyncText" class="text-[10px] text-slate-400">Status: Ready</p>
+          </div>
+          <button onclick="syncWithSheet(false)" class="bg-[#DDF2D8] text-[#13382B] px-3 py-1.5 rounded-xl text-xs font-bold">
+            Sync now
+          </button>
+        </div>
+
+        <!-- Privacy Mode Toggle -->
+        <div class="flex items-center justify-between py-2 border-b border-slate-100">
+          <div>
+            <p class="text-xs font-bold text-slate-800">Privacy Mode</p>
+            <p class="text-[10px] text-slate-400">Mask total collection numbers</p>
+          </div>
+          <button id="settingsPrivacyBtn" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 text-xs">
+            <i id="settingsPrivacyIcon" class="fa-solid fa-eye"></i>
+          </button>
+        </div>
+
+        <!-- Excel Backup Export -->
+        <div class="pt-1">
+          <button id="exportCsvBtn" class="w-full bg-[#13382B] text-white py-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
+            <i class="fa-solid fa-file-excel text-emerald-300"></i>
+            <span>Download Excel backup (CSV)</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ============================================== -->
+  <!-- MODAL: ADD GIFT (Voice + Manglish + Mode)      -->
+  <!-- ============================================== -->
+  <div id="addModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-end justify-center">
+    <div class="bg-white w-full max-w-md rounded-t-[32px] p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom duration-200">
+      
+      <div class="flex justify-between items-center border-b pb-2.5">
+        <div>
+          <h3 class="text-base font-extrabold text-[#13382B]">New gift entry</h3>
+          <p class="text-[11px] text-slate-400">Speak or type guest details</p>
+        </div>
+        <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- Realtime Manglish Suggestion Bar -->
+      <div id="suggestionBar" class="hidden flex items-center gap-1.5 bg-[#F3F6F3] border border-[#E3ECE2] px-2.5 py-1.5 rounded-xl">
+        <span class="text-[10px] font-bold text-emerald-800 shrink-0">Suggestion:</span>
+        <div id="suggestionChips" class="flex gap-1 overflow-x-auto no-scrollbar"></div>
+      </div>
+
+      <form id="entryForm" class="space-y-3">
+        
+        <!-- Voice Action & Name Input Box -->
+        <div class="space-y-1">
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Guest Name / Place</label>
+          <div class="flex gap-2">
+            <!-- CONTINUOUS LIVE VOICE BUTTON -->
+            <button type="button" id="micBtn" 
+                    class="w-12 h-12 bg-[#13382B] text-[#DDF2D8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition">
+              <i id="micIcon" class="fa-solid fa-microphone text-base"></i>
+            </button>
+            <input type="text" id="nameInput" required placeholder="Speak or Manglish (eg: midhun)..."
+                   class="w-full bg-[#F3F6F3] border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#13382B]">
+          </div>
+          <p id="voiceLiveHint" class="text-[10px] text-slate-400 font-medium px-1">Tap mic to speak. Keep speaking freely.</p>
+        </div>
+
+        <!-- Mode & Category -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mode</label>
+            <div class="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+              <button type="button" id="modeCashBtn" class="w-1/2 py-1.5 rounded-lg text-xs font-extrabold bg-white text-emerald-800 shadow-2xs">💵 Cash</button>
+              <button type="button" id="modeUpiBtn" class="w-1/2 py-1.5 rounded-lg text-xs font-bold text-slate-500">📱 UPI</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Category</label>
+            <select id="categorySelect" class="w-full bg-[#F3F6F3] border border-slate-200 text-xs font-bold py-2 px-2.5 rounded-xl outline-none">
+              <option value="General">General</option>
+              <option value="Relatives">Relatives</option>
+              <option value="Friends">Friends</option>
+              <option value="Office">Office</option>
+              <option value="Family">Family</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Amount & Quick Clickers -->
+        <div class="space-y-1">
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Amount (₹)</label>
+          <div class="relative">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 font-bold text-sm">₹</span>
+            <input type="number" id="amountInput" required placeholder="Amount" inputmode="numeric"
+                   class="w-full bg-[#F3F6F3] border border-slate-200 rounded-2xl pl-8 pr-3 py-2.5 text-base font-black text-slate-900 focus:bg-white focus:outline-none focus:border-[#13382B]">
+          </div>
+
+          <div class="flex gap-1 pt-1">
+            <button type="button" class="quick-amt px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px]" data-val="500">₹500</button>
+            <button type="button" class="quick-amt px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px]" data-val="1000">₹1000</button>
+            <button type="button" class="quick-amt px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px]" data-val="1500">₹1500</button>
+            <button type="button" class="quick-amt px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px]" data-val="2000">₹2000</button>
+            <button type="button" class="quick-amt px-3 py-1 rounded-xl bg-slate-100 text-slate-700 font-bold text-[11px]" data-val="5000">₹5000</button>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="w-full bg-[#13382B] text-white py-3.5 rounded-2xl text-xs font-black tracking-wide shadow-md active:scale-95 transition mt-2">
+          Confirm and Save Gift
+        </button>
+      </form>
     </div>
   </div>
 
-  <!-- MODAL 2: Quick Inline Edit -->
-  <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-4 space-y-3 border border-slate-100">
+  <!-- ============================================== -->
+  <!-- MODAL: EDIT GIFT                               -->
+  <!-- ============================================== -->
+  <div id="editModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-5 space-y-3 border border-slate-100">
       <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="font-bold text-slate-900 text-sm">Edit Entry</h3>
-        <button id="closeEditBtn" class="text-slate-400 hover:text-slate-700 p-1 text-base">✕</button>
+        <h3 class="font-extrabold text-slate-900 text-sm">Edit Gift Details</h3>
+        <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-700 p-1 text-base">✕</button>
       </div>
 
       <input type="hidden" id="editId">
@@ -288,23 +376,23 @@
       <div class="space-y-2 text-xs">
         <div>
           <label class="block text-slate-500 font-medium mb-1">Guest Name</label>
-          <input type="text" id="editName" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-bold text-slate-800">
+          <input type="text" id="editName" class="w-full bg-[#F3F6F3] border border-slate-200 p-2.5 rounded-xl font-bold text-slate-800">
         </div>
         <div>
           <label class="block text-slate-500 font-medium mb-1">Amount (₹)</label>
-          <input type="number" id="editAmount" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-xl font-extrabold text-slate-900 text-sm">
+          <input type="number" id="editAmount" class="w-full bg-[#F3F6F3] border border-slate-200 p-2.5 rounded-xl font-black text-slate-900 text-sm">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block text-slate-500 font-medium mb-1">Payment Mode</label>
-            <select id="editMode" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl font-semibold">
+            <label class="block text-slate-500 font-medium mb-1">Mode</label>
+            <select id="editMode" class="w-full bg-[#F3F6F3] border border-slate-200 p-2 rounded-xl font-bold">
               <option value="Cash">💵 Cash</option>
               <option value="UPI">📱 UPI</option>
             </select>
           </div>
           <div>
             <label class="block text-slate-500 font-medium mb-1">Category</label>
-            <select id="editCategory" class="w-full bg-slate-50 border border-slate-200 p-2 rounded-xl font-semibold">
+            <select id="editCategory" class="w-full bg-[#F3F6F3] border border-slate-200 p-2 rounded-xl font-bold">
               <option value="General">General</option>
               <option value="Relatives">Relatives</option>
               <option value="Friends">Friends</option>
@@ -315,14 +403,55 @@
         </div>
       </div>
 
-      <button id="saveEditBtn" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition shadow-md">
+      <button id="saveEditBtn" class="w-full py-3 bg-[#13382B] text-white font-black text-xs rounded-2xl transition shadow-md">
         Save Changes
       </button>
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- BOTTOM NAVIGATION BAR (buybest. exact style)   -->
+  <!-- ============================================== -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-[#E3ECE2] px-6 py-2 z-40">
+    <div class="max-w-md mx-auto flex justify-between items-center text-xs">
+      
+      <!-- Home Tab -->
+      <button onclick="switchTab('home')" id="nav-home" class="nav-item flex flex-col items-center gap-1 text-[#13382B]">
+        <div class="w-10 h-6 rounded-full bg-[#DDF2D8] flex items-center justify-center">
+          <i class="fa-solid fa-house text-xs"></i>
+        </div>
+        <span class="text-[10px] font-extrabold">Home</span>
+      </button>
+
+      <!-- History Tab -->
+      <button onclick="switchTab('history')" id="nav-history" class="nav-item flex flex-col items-center gap-1 text-slate-400">
+        <div class="w-10 h-6 rounded-full flex items-center justify-center">
+          <i class="fa-regular fa-clock text-xs"></i>
+        </div>
+        <span class="text-[10px] font-bold">History</span>
+      </button>
+
+      <!-- Analytics / Tally Tab -->
+      <button onclick="switchTab('analytics')" id="nav-analytics" class="nav-item flex flex-col items-center gap-1 text-slate-400">
+        <div class="w-10 h-6 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-chart-simple text-xs"></i>
+        </div>
+        <span class="text-[10px] font-bold">Spending</span>
+      </button>
+
+      <!-- Settings / Receipts Tab -->
+      <button onclick="switchTab('settings')" id="nav-settings" class="nav-item flex flex-col items-center gap-1 text-slate-400">
+        <div class="w-10 h-6 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-receipt text-xs"></i>
+        </div>
+        <span class="text-[10px] font-bold">Sync</span>
+      </button>
+
+    </div>
+  </nav>
+
   <script>
-    // ⚠️ REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
+    // ⚠️ REPLACE WITH YOUR APPS SCRIPT WEB APP URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4KQ8DpBAW19B6Hdo2cI2yncVWsrIdTYUNUoPusJSk5yWZNYQotL8-Ux_rJ6t19-z/exec";
 
     let records = JSON.parse(localStorage.getItem('wedding_registry_data')) || [];
@@ -337,20 +466,23 @@
     const categorySelect = document.getElementById('categorySelect');
     const micBtn = document.getElementById('micBtn');
     const micIcon = document.getElementById('micIcon');
-    const form = document.getElementById('entryForm');
-    const recordsContainer = document.getElementById('recordsContainer');
-    const totalAmountEl = document.getElementById('totalAmount');
-    const cashTotalEl = document.getElementById('cashTotal');
-    const upiTotalEl = document.getElementById('upiTotal');
-    const totalCountEl = document.getElementById('totalCount');
+    const voiceLiveHint = document.getElementById('voiceLiveHint');
+    const entryForm = document.getElementById('entryForm');
+    const historyFeed = document.getElementById('historyFeed');
+    const homeRecentFeed = document.getElementById('homeRecentFeed');
+    const homeRecentBadge = document.getElementById('homeRecentBadge');
+    const homeTotalAmount = document.getElementById('homeTotalAmount');
+    const homeCashTotal = document.getElementById('homeCashTotal');
+    const homeUpiTotal = document.getElementById('homeUpiTotal');
+    const homeGuestCount = document.getElementById('homeGuestCount');
     const syncDot = document.getElementById('syncDot');
-    const syncText = document.getElementById('syncText');
     const syncNowBtn = document.getElementById('syncNowBtn');
     const searchInput = document.getElementById('searchInput');
-    const feedCounter = document.getElementById('feedCounter');
+    const searchBtn = document.getElementById('searchBtn');
     const exportCsvBtn = document.getElementById('exportCsvBtn');
-    const togglePrivacyBtn = document.getElementById('togglePrivacyBtn');
-    const privacyIcon = document.getElementById('privacyIcon');
+    const settingsPrivacyBtn = document.getElementById('settingsPrivacyBtn');
+    const settingsPrivacyIcon = document.getElementById('settingsPrivacyIcon');
+    const settingsSyncText = document.getElementById('settingsSyncText');
     const toast = document.getElementById('toast');
     const toastMsg = document.getElementById('toastMsg');
     const modeCashBtn = document.getElementById('modeCashBtn');
@@ -369,132 +501,156 @@
       renderUI();
     }
 
-    // Cash vs UPI Mode Toggles
+    // ==========================================
+    // 1. TAB NAVIGATION CONTROLLER
+    // ==========================================
+    function switchTab(tabName) {
+      ['home', 'history', 'analytics', 'settings'].forEach(tab => {
+        document.getElementById(`tab-${tab}`).classList.add('hidden');
+        const navBtn = document.getElementById(`nav-${tab}`);
+        navBtn.className = "nav-item flex flex-col items-center gap-1 text-slate-400";
+        navBtn.querySelector('div').className = "w-10 h-6 rounded-full flex items-center justify-center";
+      });
+
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      activeNav.className = "nav-item flex flex-col items-center gap-1 text-[#13382B]";
+      activeNav.querySelector('div').className = "w-10 h-6 rounded-full bg-[#DDF2D8] flex items-center justify-center";
+    }
+
+    // Modal Control
+    function openAddModal(autoVoice = false) {
+      document.getElementById('addModal').classList.remove('hidden');
+      if (autoVoice) {
+        setTimeout(startVoiceRecognition, 300);
+      } else {
+        nameInput.focus();
+      }
+    }
+
+    function closeAddModal() {
+      stopVoiceRecognition();
+      document.getElementById('addModal').classList.add('hidden');
+    }
+
+    // Cash / UPI Mode Selection
     modeCashBtn.addEventListener('click', () => {
       selectedMode = 'Cash';
-      modeCashBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-emerald-700 shadow-xs transition";
-      modeUpiBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-violet-700 transition";
+      modeCashBtn.className = "w-1/2 py-1.5 rounded-lg text-xs font-extrabold bg-white text-emerald-800 shadow-2xs";
+      modeUpiBtn.className = "w-1/2 py-1.5 rounded-lg text-xs font-bold text-slate-500";
     });
 
     modeUpiBtn.addEventListener('click', () => {
       selectedMode = 'UPI';
-      modeUpiBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white text-violet-700 shadow-xs transition";
-      modeCashBtn.className = "px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-500 hover:text-emerald-700 transition";
+      modeUpiBtn.className = "w-1/2 py-1.5 rounded-lg text-xs font-extrabold bg-white text-violet-800 shadow-2xs";
+      modeCashBtn.className = "w-1/2 py-1.5 rounded-lg text-xs font-bold text-slate-500";
     });
 
     // ==========================================================
-    // 1. LIVE REAL-TIME STREAMING & CONTINUOUS MALAYALAM SPEECH
+    // 2. GUARANTEED CONTINUOUS VOICE WITH AUTO-RESTART LOOP
     // ==========================================================
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
-    let isListening = false;
-    let silenceTimer = null;
-    let finalAccumulatedTranscript = '';
+    let isUserSpeaking = false;
+    let accumulatedSpoken = '';
 
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.lang = 'ml-IN'; // Malayalam
-      recognition.continuous = true; // Does not cut off after 2 seconds
-      recognition.interimResults = true; // Real-time streaming preview
+    function initRecognitionInstance() {
+      if (!SpeechRecognition) return null;
+      const rec = new SpeechRecognition();
+      rec.lang = 'ml-IN';
+      rec.continuous = true;
+      rec.interimResults = true;
 
-      recognition.onstart = () => {
-        isListening = true;
-        finalAccumulatedTranscript = '';
-        micBtn.className = "w-11 h-11 bg-red-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-red-200 transition mic-recording";
-        micIcon.className = "fa-solid fa-stop text-sm"; // Tap to stop
-        showToast("🎙️ <b>സംസാരിക്കൂ...</b> ലൈവായി ടൈപ്പ് ആകുന്നു (Tap to Stop)");
-        resetSilenceTimer();
-      };
-
-      recognition.onresult = (e) => {
-        let interimTranscript = '';
+      rec.onresult = (e) => {
+        let interim = '';
         for (let i = e.resultIndex; i < e.results.length; ++i) {
           if (e.results[i].isFinal) {
-            finalAccumulatedTranscript += e.results[i][0].transcript + ' ';
+            accumulatedSpoken += (accumulatedSpoken ? ' ' : '') + e.results[i][0].transcript.trim();
           } else {
-            interimTranscript += e.results[i][0].transcript;
+            interim += e.results[i][0].transcript;
           }
         }
-        
-        // Show live streaming preview immediately
-        nameInput.value = (finalAccumulatedTranscript + interimTranscript).trim();
-        resetSilenceTimer(); // Reset auto-stop whenever speech is actively detected
+        nameInput.value = (accumulatedSpoken + ' ' + interim).trim();
+        voiceLiveHint.textContent = "🎙️ Live transcribing...";
+        voiceLiveHint.className = "text-[10px] text-emerald-600 font-bold px-1";
       };
 
-      recognition.onerror = (e) => {
-        console.error("Speech Error:", e.error);
+      rec.onerror = (e) => {
         if (e.error === 'not-allowed') {
-          showToast("⚠️ Microphone blocked. Allow permission in Chrome settings.");
-        }
-        stopVoiceRecognition();
-      };
-
-      recognition.onend = () => {
-        stopVoiceRecognition();
-      };
-    }
-
-    // Auto-stop after 2.5s of total silence once user finishes speaking
-    function resetSilenceTimer() {
-      clearTimeout(silenceTimer);
-      silenceTimer = setTimeout(() => {
-        if (isListening) {
+          isUserSpeaking = false;
+          showToast("Microphone permission denied");
           stopVoiceRecognition();
         }
-      }, 2500);
+      };
+
+      rec.onend = () => {
+        // KEEP-ALIVE: If user hasn't tapped stop, immediately restart recognition
+        if (isUserSpeaking) {
+          setTimeout(() => {
+            if (isUserSpeaking) {
+              try { rec.start(); } catch(e){}
+            }
+          }, 60);
+        }
+      };
+
+      return rec;
     }
 
-    function stopVoiceRecognition() {
-      clearTimeout(silenceTimer);
-      if (recognition && isListening) {
-        try { recognition.stop(); } catch(e) {}
-      }
-      isListening = false;
-      micBtn.className = "w-11 h-11 bg-emerald-600 active:bg-emerald-700 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-200 transition";
-      micIcon.className = "fa-solid fa-microphone text-sm";
-
-      if (nameInput.value.trim().length > 0) {
-        showToast(`✓ മനസ്സിലായി: "<b>${nameInput.value.trim()}</b>"`, 2000);
-        amountInput.focus();
-      }
-    }
-
-    micBtn.addEventListener('click', async () => {
+    async function startVoiceRecognition() {
       if (!SpeechRecognition) {
-        showToast("💡 Use mobile keyboard mic (Gboard) on this browser!");
+        showToast("Use Mobile keyboard mic (Gboard)");
         return;
       }
 
-      // If active, pressing again stops recording immediately
-      if (isListening) {
-        stopVoiceRecognition();
-        return;
-      }
-
-      nameInput.blur(); // Dismiss virtual keyboard
-
-      // Force prompt on Android
+      // Audio permission handshake
       try {
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           stream.getTracks().forEach(t => t.stop());
         }
-      } catch (err) {
-        showToast("⚠️ Microphone Permission Denied in browser!");
+      } catch(err) {
+        showToast("⚠️ Microphone Permission Blocked!");
         return;
       }
 
+      isUserSpeaking = true;
+      accumulatedSpoken = nameInput.value.trim();
+      micBtn.className = "w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg mic-live-pulse transition";
+      micIcon.className = "fa-solid fa-stop text-base";
+      voiceLiveHint.textContent = "🎙️ Listening freely... Tap red button when finished.";
+      voiceLiveHint.className = "text-[10px] text-red-600 font-bold px-1";
+
+      if (!recognition) recognition = initRecognitionInstance();
       try {
-        nameInput.value = '';
         recognition.start();
-      } catch (e) {
-        recognition.stop();
-        setTimeout(() => recognition.start(), 200);
+      } catch(e) {
+        try { recognition.stop(); setTimeout(() => recognition.start(), 150); } catch(err){}
       }
+    }
+
+    function stopVoiceRecognition() {
+      isUserSpeaking = false;
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
+      micBtn.className = "w-12 h-12 bg-[#13382B] text-[#DDF2D8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition";
+      micIcon.className = "fa-solid fa-microphone text-base";
+      voiceLiveHint.textContent = "Tap mic to speak. Keep speaking freely.";
+      voiceLiveHint.className = "text-[10px] text-slate-400 font-medium px-1";
+
+      if (nameInput.value.trim()) {
+        amountInput.focus();
+      }
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (isUserSpeaking) stopVoiceRecognition();
+      else startVoiceRecognition();
     });
 
     // ==========================================
-    // 2. MANGLISH TRANSLITERATION ENGINE
+    // 3. MANGLISH TRANSLITERATION ENGINE
     // ==========================================
     let transliterateDebounce = null;
     const nameMap = {
@@ -533,42 +689,25 @@
         renderSuggestions([nameMap[currentWord]]);
       }
 
-      transliterateDebounce = setTimeout(() => {
-        fetchMalayalamCandidates(currentWord);
+      transliterateDebounce = setTimeout(async () => {
+        let candidates = nameMap[currentWord] ? [nameMap[currentWord]] : [];
+        try {
+          const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(currentWord)}&itc=ml-t-i0-und&num=3&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage`);
+          const json = await res.json();
+          if (json[0] === 'SUCCESS' && json[1] && json[1][0] && json[1][0][1]) {
+            candidates = json[1][0][1];
+          }
+        } catch(e){}
+        if (candidates.length > 0) renderSuggestions(candidates);
       }, 200);
     });
-
-    async function fetchMalayalamCandidates(word) {
-      let candidates = nameMap[word] ? [nameMap[word]] : [];
-      try {
-        const res = await fetch(`https://inputtools.google.com/request?text=${encodeURIComponent(word)}&itc=ml-t-i0-und&num=3&cp=0&cs=1&ie=utf-8&oe=utf-8&app=demopage`);
-        const json = await res.json();
-        if (json[0] === 'SUCCESS' && json[1] && json[1][0] && json[1][0][1]) {
-          candidates = json[1][0][1];
-        }
-      } catch (e) {
-        if (!SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) {
-          try {
-            const res2 = await fetch(`${SCRIPT_URL}?action=transliterate&text=${encodeURIComponent(word)}`);
-            const json2 = await res2.json();
-            if (json2[0] === 'SUCCESS' && json2[1] && json2[1][0] && json2[1][0][1]) {
-              candidates = json2[1][0][1];
-            }
-          } catch(err) {}
-        }
-      }
-
-      if (candidates.length > 0) {
-        renderSuggestions(candidates);
-      }
-    }
 
     function renderSuggestions(candidates) {
       suggestionChips.innerHTML = '';
       candidates.slice(0, 3).forEach(c => {
         const chip = document.createElement('button');
         chip.type = 'button';
-        chip.className = "bg-white hover:bg-indigo-100 border border-indigo-200 text-indigo-900 font-extrabold px-2.5 py-0.5 rounded-lg text-xs active:scale-95 transition shadow-2xs";
+        chip.className = "bg-white hover:bg-emerald-50 border border-emerald-300 text-[#13382B] font-extrabold px-3 py-1 rounded-lg text-xs active:scale-95 transition shadow-2xs";
         chip.textContent = c;
         chip.onclick = () => {
           const words = nameInput.value.split(' ');
@@ -583,7 +722,7 @@
     }
 
     // ==========================================
-    // 3. UI RENDERING & BANK STATEMENT CARDS
+    // 4. UI RENDERING (Home + History Feeds)
     // ==========================================
     function renderUI() {
       const q = searchInput.value.toLowerCase().trim();
@@ -601,74 +740,92 @@
       const upiTotal = records.filter(r => r.mode === 'UPI').reduce((s, r) => s + r.amount, 0);
       const count = records.length;
 
+      // Home Cards
       if (isPrivacyOn) {
-        totalAmountEl.textContent = "₹ ••••••";
-        cashTotalEl.textContent = "••••";
-        upiTotalEl.textContent = "••••";
+        homeTotalAmount.textContent = "₹ ••••••";
+        homeCashTotal.textContent = "••••";
+        homeUpiTotal.textContent = "••••";
       } else {
-        totalAmountEl.textContent = `₹ ${total.toLocaleString('en-IN')}`;
-        cashTotalEl.textContent = cashTotal.toLocaleString('en-IN');
-        upiTotalEl.textContent = upiTotal.toLocaleString('en-IN');
+        homeTotalAmount.textContent = `₹ ${total.toLocaleString('en-IN')}`;
+        homeCashTotal.textContent = cashTotal.toLocaleString('en-IN');
+        homeUpiTotal.textContent = upiTotal.toLocaleString('en-IN');
+      }
+      homeGuestCount.textContent = count;
+      homeRecentBadge.textContent = count;
+
+      // Render Home Recent 3 Entries (buybest. "Needs review" style)
+      homeRecentFeed.innerHTML = '';
+      if (records.length === 0) {
+        homeRecentFeed.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs font-semibold">No gifts recorded yet</div>`;
+      } else {
+        records.slice(0, 3).forEach(item => {
+          const div = document.createElement('div');
+          div.className = "p-3 flex justify-between items-center";
+          div.innerHTML = `
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[#F3F6F3] flex items-center justify-center text-sm">
+                ${item.mode === 'Cash' ? '💵' : '📱'}
+              </div>
+              <div>
+                <p class="font-extrabold text-[#13382B] text-xs">${item.name}</p>
+                <p class="text-[10px] text-slate-400 font-medium">${item.dateString} · ${item.category || 'General'}</p>
+              </div>
+            </div>
+            <p class="font-black text-[#13382B] text-xs">₹ ${item.amount.toLocaleString('en-IN')}</p>
+          `;
+          homeRecentFeed.appendChild(div);
+        });
       }
 
-      totalCountEl.textContent = count;
-      feedCounter.textContent = `${list.length} of ${count}`;
+      // Render Full History Cards (buybest. "Purchase history" style)
+      historyFeed.innerHTML = '';
+      if (list.length === 0) {
+        historyFeed.innerHTML = `
+          <div class="bg-white rounded-3xl p-8 border border-[#E3ECE2] text-center text-slate-400 text-xs font-semibold">
+            No matching entries found
+          </div>`;
+      } else {
+        list.forEach(item => {
+          const isPending = item.syncStatus === 'pending';
+          const card = document.createElement('div');
+          card.className = "bg-white rounded-3xl p-4 border border-[#E3ECE2] shadow-2xs space-y-3";
+          
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-black text-[#13382B] text-sm tracking-tight">${item.name}</h4>
+                <p class="text-[10px] font-semibold text-slate-400 mt-0.5">
+                  ${item.category || 'General'} · ${item.dateString} · <span class="text-emerald-700">${item.mode || 'Cash'}</span>
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-base font-black text-[#13382B]">${isPrivacyOn ? '₹ •••' : '₹ ' + item.amount.toLocaleString('en-IN')}</p>
+                <span class="text-[9px] font-bold ${isPending ? 'text-amber-500 animate-pulse' : 'text-emerald-600'}">
+                  ${isPending ? 'Syncing...' : '✓ Synced'}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-1 border-t border-slate-100">
+              <button onclick="openEditModal('${item.id}')" class="bg-[#F3F6F3] hover:bg-[#E3ECE2] text-[#13382B] text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                Edit
+              </button>
+              <button onclick="deleteRecord('${item.id}')" class="bg-[#FFF0F0] hover:bg-[#FFE0E0] text-rose-700 text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                Delete
+              </button>
+            </div>
+          `;
+          historyFeed.appendChild(card);
+        });
+      }
 
       updateTallyComparison(cashTotal);
-
-      recordsContainer.innerHTML = '';
-      if (list.length === 0) {
-        recordsContainer.innerHTML = `
-          <div class="bg-white border border-slate-200/80 rounded-2xl p-8 text-center text-slate-400 text-xs">
-            <i class="fa-regular fa-folder-open text-2xl mb-1 text-slate-300 block"></i>
-            No records found
-          </div>`;
-        return;
-      }
-
-      list.forEach((item) => {
-        const isPending = item.syncStatus === 'pending';
-        const isCash = item.mode === 'Cash';
-        const card = document.createElement('div');
-        card.className = "bg-white border border-slate-200/70 rounded-2xl p-3.5 flex justify-between items-center shadow-xs hover:border-slate-300 transition";
-        
-        card.innerHTML = `
-          <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl ${isCash ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-violet-50 text-violet-700 border-violet-100'} border flex items-center justify-center font-black text-sm shrink-0">
-              ${isCash ? '💵' : '📱'}
-            </div>
-            <div>
-              <div class="flex items-center gap-1.5">
-                <p class="font-extrabold text-slate-900 text-xs tracking-tight">${item.name}</p>
-                <span class="text-[9px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 font-bold">${item.category || 'General'}</span>
-              </div>
-              <p class="text-[10px] text-slate-400 mt-0.5 font-medium">${item.dateString} · <span class="font-bold ${isCash ? 'text-emerald-600' : 'text-violet-600'}">${item.mode || 'Cash'}</span></p>
-            </div>
-          </div>
-
-          <div class="text-right flex items-center gap-2">
-            <div>
-              <p class="font-black text-slate-900 text-sm tracking-tight">${isPrivacyOn ? '₹ •••' : '₹ ' + item.amount.toLocaleString('en-IN')}</p>
-              <span class="text-[9px] font-bold ${isPending ? 'text-amber-500 animate-pulse' : 'text-emerald-600'}">
-                ${isPending ? 'Syncing...' : '✓'}
-              </span>
-            </div>
-            <button onclick="openEditModal('${item.id}')" class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition">
-              <i class="fa-solid fa-pen text-[11px]"></i>
-            </button>
-            <button onclick="deleteRecord('${item.id}')" class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-300 hover:text-rose-500 flex items-center justify-center transition">
-              <i class="fa-regular fa-trash-can text-[11px]"></i>
-            </button>
-          </div>
-        `;
-        recordsContainer.appendChild(card);
-      });
     }
 
     // ==========================================
-    // 4. SUBMISSION & EDIT HANDLING
+    // 5. SUBMISSION & EDIT LOGIC
     // ==========================================
-    form.addEventListener('submit', (e) => {
+    entryForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const name = nameInput.value.trim();
       const amount = parseFloat(amountInput.value);
@@ -692,9 +849,8 @@
 
       nameInput.value = '';
       amountInput.value = '';
-      suggestionBar.classList.add('hidden');
-      if (navigator.vibrate) navigator.vibrate(30);
-      nameInput.focus();
+      closeAddModal();
+      showToast("✓ Gift recorded successfully");
 
       pushPendingQueue();
     });
@@ -712,9 +868,9 @@
       document.getElementById('editModal').classList.remove('hidden');
     };
 
-    document.getElementById('closeEditBtn').addEventListener('click', () => {
+    function closeEditModal() {
       document.getElementById('editModal').classList.add('hidden');
-    });
+    }
 
     document.getElementById('saveEditBtn').addEventListener('click', () => {
       const id = document.getElementById('editId').value;
@@ -732,8 +888,8 @@
         item.mode = mode;
         item.category = category;
         saveLocal();
-        showToast("✓ Entry updated successfully");
-        document.getElementById('editModal').classList.add('hidden');
+        showToast("✓ Changes saved");
+        closeEditModal();
 
         fetch(SCRIPT_URL, {
           method: 'POST',
@@ -745,7 +901,7 @@
     });
 
     window.deleteRecord = function(id) {
-      if (confirm("Remove this entry from register?")) {
+      if (confirm("Remove this entry from the registry?")) {
         records = records.filter(r => r.id !== id);
         saveLocal();
 
@@ -759,30 +915,8 @@
     };
 
     // ==========================================
-    // 5. CASH TALLY COUNTER
+    // 6. TALLY RECONCILIATION ENGINE
     // ==========================================
-    const tallyModal = document.getElementById('tallyModal');
-    const openTallyBtn = document.getElementById('openTallyBtn');
-    const closeTallyBtn = document.getElementById('closeTallyBtn');
-    const saveTallyCloseBtn = document.getElementById('saveTallyCloseBtn');
-    const resetTallyBtn = document.getElementById('resetTallyBtn');
-    const countedCashText = document.getElementById('countedCashText');
-    const expectedCashText = document.getElementById('expectedCashText');
-    const tallyStatusText = document.getElementById('tallyStatusText');
-    const tallyBanner = document.getElementById('tallyBanner');
-
-    openTallyBtn.addEventListener('click', () => {
-      document.querySelectorAll('.denom-input').forEach(inp => {
-        const val = inp.dataset.val;
-        inp.value = denominationCounts[val] || '';
-      });
-      renderUI();
-      tallyModal.classList.remove('hidden');
-    });
-
-    closeTallyBtn.addEventListener('click', () => tallyModal.classList.add('hidden'));
-    saveTallyCloseBtn.addEventListener('click', () => tallyModal.classList.add('hidden'));
-
     document.querySelectorAll('.denom-input').forEach(inp => {
       inp.addEventListener('input', () => {
         const denom = inp.dataset.val;
@@ -793,7 +927,7 @@
       });
     });
 
-    resetTallyBtn.addEventListener('click', () => {
+    document.getElementById('resetTallyBtn').addEventListener('click', () => {
       if (confirm("Reset note counts?")) {
         denominationCounts = {};
         localStorage.removeItem('wedding_denom_counts');
@@ -811,34 +945,37 @@
         counted += (denom * count);
       });
 
-      countedCashText.textContent = `₹ ${counted.toLocaleString('en-IN')}`;
-      expectedCashText.textContent = `₹ ${expectedCash.toLocaleString('en-IN')}`;
+      document.getElementById('countedCashText').textContent = `₹ ${counted.toLocaleString('en-IN')}`;
+      document.getElementById('expectedCashText').textContent = `₹ ${expectedCash.toLocaleString('en-IN')}`;
 
       const diff = counted - expectedCash;
+      const statusText = document.getElementById('tallyStatusText');
+      const banner = document.getElementById('tallyBanner');
+
       if (counted === 0 && expectedCash === 0) {
-        tallyStatusText.textContent = "No cash recorded yet";
-        tallyBanner.className = "p-3 rounded-2xl text-xs space-y-1 bg-slate-50 border border-slate-200";
+        statusText.textContent = "Enter note counts to compare";
+        banner.className = "p-3.5 rounded-2xl text-xs space-y-1.5 bg-[#F3F6F3] border border-slate-200";
       } else if (diff === 0) {
-        tallyStatusText.innerHTML = "✅ Perfect Match! All physical cash accounted for.";
-        tallyBanner.className = "p-3 rounded-2xl text-xs space-y-1 bg-emerald-50 border border-emerald-200 text-emerald-800";
+        statusText.innerHTML = "✅ Perfect Match! All cash accounted for.";
+        banner.className = "p-3.5 rounded-2xl text-xs space-y-1.5 bg-[#DDF2D8] border border-emerald-300 text-[#13382B]";
       } else if (diff < 0) {
-        tallyStatusText.innerHTML = `⚠️ Shortage: <b>₹ ${Math.abs(diff).toLocaleString('en-IN')} കുറവുണ്ട് (Mismatch)</b>`;
-        tallyBanner.className = "p-3 rounded-2xl text-xs space-y-1 bg-rose-50 border border-rose-200 text-rose-800";
+        statusText.innerHTML = `⚠️ Shortage: <b>₹ ${Math.abs(diff).toLocaleString('en-IN')} കുറവുണ്ട് (Mismatch)</b>`;
+        banner.className = "p-3.5 rounded-2xl text-xs space-y-1.5 bg-rose-50 border border-rose-200 text-rose-800";
       } else {
-        tallyStatusText.innerHTML = `ℹ️ Surplus: <b>₹ ${diff.toLocaleString('en-IN')} കൂടുതലുണ്ട്</b>`;
-        tallyBanner.className = "p-3 rounded-2xl text-xs space-y-1 bg-amber-50 border border-amber-200 text-amber-800";
+        statusText.innerHTML = `ℹ️ Surplus: <b>₹ ${diff.toLocaleString('en-IN')} കൂടുതലുണ്ട്</b>`;
+        banner.className = "p-3.5 rounded-2xl text-xs space-y-1.5 bg-amber-50 border border-amber-200 text-amber-800";
       }
     }
 
     // ==========================================
-    // 6. INSTANT RECONCILE BATCH SYNC
+    // 7. GOOGLE SHEETS BATCH SYNC ENGINE
     // ==========================================
     async function syncWithSheet(isSilent = false) {
       if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) return;
 
       if (!isSilent) {
-        syncDot.className = "w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse";
-        syncText.textContent = "Syncing...";
+        syncDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+        settingsSyncText.textContent = "Status: Syncing...";
       }
 
       const controller = new AbortController();
@@ -876,14 +1013,14 @@
           });
 
           saveLocal();
-          syncDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
-          syncText.textContent = "Synced ✓";
+          syncDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+          settingsSyncText.textContent = "Status: All Synced ✓";
           renderUI();
         }
       } catch (err) {
         clearTimeout(timeoutId);
-        syncDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
-        syncText.textContent = records.length > 0 ? "Ready (Local)" : "Offline";
+        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+        settingsSyncText.textContent = records.length > 0 ? "Status: Ready (Local)" : "Status: Offline";
       }
     }
 
@@ -897,9 +1034,7 @@
       if (pending.length === 0) return;
 
       isSyncingQueue = true;
-      syncDot.className = "w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse";
-      syncText.textContent = `Syncing (${pending.length})...`;
-      renderUI();
+      syncDot.className = "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
 
       try {
         await fetch(SCRIPT_URL, {
@@ -915,36 +1050,32 @@
         pending.forEach(item => item.syncStatus = 'synced');
         saveLocal();
 
-        syncDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500";
-        syncText.textContent = "Synced ✓";
+        syncDot.className = "w-2 h-2 rounded-full bg-emerald-500";
       } catch(err) {
-        syncDot.className = "w-1.5 h-1.5 rounded-full bg-slate-400";
-        syncText.textContent = "Offline";
+        syncDot.className = "w-2 h-2 rounded-full bg-slate-400";
       } finally {
         isSyncingQueue = false;
         renderUI();
         const stillPending = records.filter(r => r.syncStatus === 'pending');
-        if (stillPending.length > 0) {
-          setTimeout(pushPendingQueue, 800);
-        }
+        if (stillPending.length > 0) setTimeout(pushPendingQueue, 800);
       }
     }
 
-    // Quick filters, CSV & Privacy
+    // Quick Amounts, Filters & Privacy
     document.querySelectorAll('.quick-amt').forEach(btn => btn.addEventListener('click', () => amountInput.value = btn.dataset.val));
     
     document.querySelectorAll('.filter-chip').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.filter-chip').forEach(b => b.className = "filter-chip px-3 py-1 rounded-lg font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shrink-0");
-        btn.className = "filter-chip px-3 py-1 rounded-lg font-bold bg-slate-900 text-white shadow-xs shrink-0";
+        document.querySelectorAll('.filter-chip').forEach(b => b.className = "filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-slate-600 shrink-0");
+        btn.className = "filter-chip px-3 py-1.5 rounded-xl font-extrabold bg-[#13382B] text-white shadow-2xs shrink-0";
         currentFilter = btn.dataset.filter;
         renderUI();
       });
     });
 
-    togglePrivacyBtn.addEventListener('click', () => {
+    settingsPrivacyBtn.addEventListener('click', () => {
       isPrivacyOn = !isPrivacyOn;
-      privacyIcon.className = isPrivacyOn ? "fa-solid fa-eye-slash text-indigo-600" : "fa-solid fa-eye";
+      settingsPrivacyIcon.className = isPrivacyOn ? "fa-solid fa-eye-slash text-emerald-600" : "fa-solid fa-eye";
       renderUI();
     });
 
@@ -960,8 +1091,16 @@
     });
 
     searchInput.addEventListener('input', renderUI);
+    searchBtn.addEventListener('click', renderUI);
     syncNowBtn.addEventListener('click', () => syncWithSheet(false));
 
+    // Load saved counts into inputs
+    document.querySelectorAll('.denom-input').forEach(inp => {
+      const val = inp.dataset.val;
+      inp.value = denominationCounts[val] || '';
+    });
+
+    // Initial render & sync
     renderUI();
     syncWithSheet(true);
   </script>
