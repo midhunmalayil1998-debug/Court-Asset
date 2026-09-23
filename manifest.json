@@ -1,0 +1,17 @@
+{
+  "name": "Wedding Registry Pro",
+  "short_name": "wedding.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F3F6F3",
+  "theme_color": "#13382B",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3159/3159416.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
