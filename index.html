@@ -99,16 +99,16 @@
           </div>
         </div>
 
-        <!-- Hero Actions (Only opens modal, does not auto-record) -->
+        <!-- Hero Actions -->
         <div class="mt-5 space-y-2">
           <button onclick="openAddModal()" class="w-full bg-[#DDF2D8] text-[#13382B] font-extrabold text-xs py-3.5 px-4 rounded-2xl flex items-center justify-between shadow-sm active:scale-95 transition">
             <div class="flex items-center gap-2.5">
               <div class="w-7 h-7 rounded-xl bg-[#13382B] text-white flex items-center justify-center text-xs">
-                <i class="fa-solid fa-plus"></i>
+                <i class="fa-solid fa-microphone"></i>
               </div>
               <div class="text-left">
-                <p class="leading-none text-xs font-black">Add New Gift</p>
-                <p class="text-[10px] text-emerald-800 font-medium mt-0.5">Voice or Manual Entry</p>
+                <p class="leading-none text-xs font-black">Voice / Smart Entry</p>
+                <p class="text-[10px] text-emerald-800 font-medium mt-0.5">Speak Name & Amount together</p>
               </div>
             </div>
             <i class="fa-solid fa-arrow-right text-xs"></i>
@@ -272,25 +272,25 @@
 
   </main>
 
-  <!-- MODAL: ADD GIFT -->
+  <!-- MODAL: ADD GIFT (Voice + Gboard + Mode) -->
   <div id="addModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-end justify-center">
     <div class="bg-white w-full max-w-md rounded-t-[32px] p-5 space-y-3.5 shadow-2xl animate-in slide-in-from-bottom duration-200">
       
       <div class="flex justify-between items-center border-b pb-2.5">
         <div>
           <h3 class="text-base font-extrabold text-[#13382B]">New gift entry</h3>
-          <p class="text-[11px] text-slate-400">Speak or type guest details</p>
+          <p class="text-[11px] text-slate-400">Speak name & amount together</p>
         </div>
         <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold">✕</button>
       </div>
 
-      <!-- Realtime AI Speech Feedback Badge -->
+      <!-- Realtime Speech Feedback Badge -->
       <div id="voiceParsePreview" class="hidden bg-[#DDF2D8] border border-emerald-300 p-2 rounded-xl text-xs flex items-center justify-between">
         <div class="flex items-center gap-1.5 overflow-hidden">
           <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse shrink-0"></span>
           <p id="voiceParsePreviewText" class="font-bold text-[#13382B] truncate text-[11px]"></p>
         </div>
-        <span class="text-[10px] text-emerald-800 font-extrabold shrink-0 bg-white/60 px-1.5 py-0.5 rounded-md">Live Detected</span>
+        <span class="text-[10px] text-emerald-800 font-extrabold shrink-0 bg-white/60 px-1.5 py-0.5 rounded-md">Detected</span>
       </div>
 
       <!-- Realtime Manglish Suggestion Bar -->
@@ -313,7 +313,7 @@
             <input type="text" id="nameInput" required placeholder="Type or click mic (eg: suresh 1500)..."
                    class="w-full bg-[#F3F6F3] border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#13382B]">
           </div>
-          <p id="voiceLiveHint" class="text-[10px] text-slate-400 font-medium px-1">💡 Click mic to speak name & amount. Click again to stop.</p>
+          <p id="voiceLiveHint" class="text-[10px] text-slate-400 font-medium px-1">💡 Click mic (or use Gboard mic) to speak name & amount.</p>
         </div>
 
         <!-- Mode & Category -->
@@ -445,7 +445,7 @@
   </nav>
 
   <script>
-    // ⚠️ REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
+    // ✅ Direct Connected Google Apps Script URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4KQ8DpBAW19B6Hdo2cI2yncVWsrIdTYUNUoPusJSk5yWZNYQotL8-Ux_rJ6t19-z/exec";
 
     let records = JSON.parse(localStorage.getItem('wedding_registry_data')) || [];
@@ -497,7 +497,7 @@
       setTimeout(() => toast.classList.add('hidden'), duration);
     }
 
-    // Safely parse timestamps from Sheet (e.g. 23/09/2026 10:15 AM)
+    // Safely parse timestamps from Sheet
     function parseTimestampSafe(ts) {
       if (!ts) return Date.now();
       const parsed = Date.parse(ts);
@@ -533,11 +533,9 @@
       activeNav.className = "nav-item flex flex-col items-center gap-1 text-[#13382B]";
       activeNav.querySelector('div').className = "w-10 h-6 rounded-full bg-[#DDF2D8] flex items-center justify-center";
       
-      // Stop mic if running when switching tabs
       stopVoiceRecording();
     }
 
-    // Open Modal WITHOUT starting voice auto-recording
     function openAddModal() {
       document.getElementById('addModal').classList.remove('hidden');
       voiceParsePreview.classList.add('hidden');
@@ -562,13 +560,8 @@
     });
 
     // =========================================================================
-    // ⚡ HIGH-ACCURACY MALAYALAM SPEECH & PARSER ENGINE
+    // ⚡ ADVANCED SPEECH PARSER (Handles Numbers, Words, and Modes)
     // =========================================================================
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isRecordingActive = false;
-    let finalTranscribedBuffer = '';
-
     function parseSpokenInput(rawText) {
       if (!rawText) return { name: '', amount: null, mode: null };
       let text = rawText.trim();
@@ -587,70 +580,104 @@
       // 2. Normalize commas inside numbers (e.g., "1,000" -> "1000")
       text = text.replace(/(\d),(\d)/g, '$1$2');
 
-      // 3. Extract Digit Numbers if spoken directly (e.g. 500, 1000, 2500)
-      const digitMatch = text.match(/\b\d{2,7}\b/);
-      if (digitMatch) {
-        calculatedAmount = parseInt(digitMatch[0], 10);
-        text = text.replace(digitMatch[0], ' ');
+      // 3. Extract Digit Numbers if spoken directly (e.g. 500, 1000, 2500, 2k)
+      const kMatch = text.match(/\b(\d+)\s*k\b/i);
+      if (kMatch) {
+        calculatedAmount = parseInt(kMatch[1], 10) * 1000;
+        text = text.replace(kMatch[0], ' ');
       } else {
-        // 4. Advanced Malayalam Compound Numbers
-        const combinations = [
-          { pattern: /(രണ്ടായിരത്തിയഞ്ഞൂറ്|രണ്ടായിരത്തി\s*അഞ്ഞൂറ്)/i, value: 2500 },
-          { pattern: /(ആയിരത്തിയഞ്ഞൂറ്|ആയിരത്തി\s*അഞ്ഞൂറ്)/i, value: 1500 },
-          { pattern: /(ആയിരത്തി\s*ഒരുനൂറ്|ആയിരത്തിയിരുന്നൂറ്)/i, value: 1200 },
-          { pattern: /(മൂവായിരത്തി\s*അഞ്ഞൂറ്|മൂവായിരത്തിയഞ്ഞൂറ്)/i, value: 3500 },
-          { pattern: /(അയ്യായിരത്തി\s*അഞ്ഞൂറ്|അയ്യായിരത്തിയഞ്ഞൂറ്)/i, value: 5500 },
-          { pattern: /പതിനായിരം/i, value: 10000 },
-          { pattern: /ഒമ്പതിനായിരം/i, value: 9000 },
-          { pattern: /എട്ടായിരം/i, value: 8000 },
-          { pattern: /ഏഴായിരം/i, value: 7000 },
-          { pattern: /ആറായിരം/i, value: 6000 },
-          { pattern: /(അയ്യായിരം|അഞ്ചായിരം)/i, value: 5000 },
-          { pattern: /നാലായിരം/i, value: 4000 },
-          { pattern: /മൂവായിരം/i, value: 3000 },
-          { pattern: /രണ്ടായിരം/i, value: 2000 },
-          { pattern: /(ആയിരത്തി|ആയിരം)/i, value: 1000 },
-          { pattern: /തൊള്ളായിരം/i, value: 900 },
-          { pattern: /എണ്ണൂറ്/i, value: 800 },
-          { pattern: /എഴുന്നൂറ്/i, value: 700 },
-          { pattern: /അറുന്നൂറ്/i, value: 600 },
-          { pattern: /(അഞ്ഞൂറ്|അഞ്ഞൂറു)/i, value: 500 },
-          { pattern: /നാനൂറ്/i, value: 400 },
-          { pattern: /മുന്നൂറ്/i, value: 300 },
-          { pattern: /ഇരുന്നൂറ്/i, value: 200 },
-          { pattern: /(നൂറ്റി|നൂറ്|നൂറു)/i, value: 100 }
-        ];
+        const digitMatch = text.match(/\b\d{2,7}\b/);
+        if (digitMatch) {
+          calculatedAmount = parseInt(digitMatch[0], 10);
+          text = text.replace(digitMatch[0], ' ');
+        } else {
+          // 4. Malayalam Compound Numbers
+          const combinations = [
+            { pattern: /(രണ്ടായിരത്തിയഞ്ഞൂറ്|രണ്ടായിരത്തി\s*അഞ്ഞൂറ്)/i, value: 2500 },
+            { pattern: /(ആയിരത്തിയഞ്ഞൂറ്|ആയിരത്തി\s*അഞ്ഞൂറ്)/i, value: 1500 },
+            { pattern: /(ആയിരത്തി\s*ഒരുനൂറ്|ആയിരത്തിയിരുന്നൂറ്)/i, value: 1200 },
+            { pattern: /(മൂവായിരത്തി\s*അഞ്ഞൂറ്|മൂവായിരത്തിയഞ്ഞൂറ്)/i, value: 3500 },
+            { pattern: /(അയ്യായിരത്തി\s*അഞ്ഞൂറ്|അയ്യായിരത്തിയഞ്ഞൂറ്)/i, value: 5500 },
+            { pattern: /പതിനായിരം/i, value: 10000 },
+            { pattern: /ഒമ്പതിനായിരം/i, value: 9000 },
+            { pattern: /എട്ടായിരം/i, value: 8000 },
+            { pattern: /ഏഴായിരം/i, value: 7000 },
+            { pattern: /ആറായിരം/i, value: 6000 },
+            { pattern: /(അയ്യായിരം|അഞ്ചായിരം)/i, value: 5000 },
+            { pattern: /നാലായിരം/i, value: 4000 },
+            { pattern: /മൂവായിരം/i, value: 3000 },
+            { pattern: /രണ്ടായിരം/i, value: 2000 },
+            { pattern: /(ആയിരത്തി|ആയിരം)/i, value: 1000 },
+            { pattern: /തൊള്ളായിരം/i, value: 900 },
+            { pattern: /എണ്ണൂറ്/i, value: 800 },
+            { pattern: /എഴുന്നൂറ്/i, value: 700 },
+            { pattern: /അറുന്നൂറ്/i, value: 600 },
+            { pattern: /(അഞ്ഞൂറ്|അഞ്ഞൂറു)/i, value: 500 },
+            { pattern: /നാനൂറ്/i, value: 400 },
+            { pattern: /മുന്നൂറ്/i, value: 300 },
+            { pattern: /ഇരുന്നൂറ്/i, value: 200 },
+            { pattern: /(നൂറ്റി|നൂറ്|നൂറു)/i, value: 100 }
+          ];
 
-        let tot = 0;
-        let foundAny = false;
-        for (const item of combinations) {
-          if (item.pattern.test(text)) {
-            tot += item.value;
-            text = text.replace(item.pattern, ' ');
-            foundAny = true;
-            break;
-          }
-        }
-
-        // Catch hundred if said separately (e.g. ആയിരം + അഞ്ഞൂറ്)
-        if (tot === 1000 || tot === 2000 || tot === 3000 || tot === 5000) {
-          for (const hItem of combinations.slice(15)) {
-            if (hItem.pattern.test(text)) {
-              tot += hItem.value;
-              text = text.replace(hItem.pattern, ' ');
+          let tot = 0;
+          let foundAny = false;
+          for (const item of combinations) {
+            if (item.pattern.test(text)) {
+              tot += item.value;
+              text = text.replace(item.pattern, ' ');
+              foundAny = true;
               break;
             }
           }
-        }
 
-        if (foundAny) calculatedAmount = tot;
+          if (tot === 1000 || tot === 2000 || tot === 3000 || tot === 5000) {
+            for (const hItem of combinations.slice(15)) {
+              if (hItem.pattern.test(text)) {
+                tot += hItem.value;
+                text = text.replace(hItem.pattern, ' ');
+                break;
+              }
+            }
+          }
+          if (foundAny) calculatedAmount = tot;
+        }
       }
 
       // 5. Clean noise filler words
       text = text.replace(/(രൂപ|rupees|rupee|rs|ആണ്|തന്നത്|തന്നു|തന്ന)/gi, ' ').replace(/\s+/g, ' ').trim();
-
       return { name: text, amount: calculatedAmount, mode: detectedMode };
     }
+
+    // =========================================================================
+    // ⚡ GBOARD NATIVE MIC REAL-TIME AUTO-SPLIT LISTENER
+    // =========================================================================
+    nameInput.addEventListener('input', () => {
+      const currentVal = nameInput.value;
+      
+      // When Gboard native voice inputs numbers or Malayalam currency words
+      if (/\b\d{2,6}\b/.test(currentVal) || /(ആയിരം|അഞ്ഞൂറ്|രണ്ടായിരം|നൂറ്|gpay|ക്യാഷ്)/i.test(currentVal)) {
+        const parsed = parseSpokenInput(currentVal);
+        
+        if (parsed.amount) {
+          amountInput.value = parsed.amount;
+          nameInput.value = parsed.name; // Keep pure guest name in Name box
+          
+          if (parsed.mode === 'UPI') modeUpiBtn.click();
+          else if (parsed.mode === 'Cash') modeCashBtn.click();
+          
+          showToast(`⚡ Auto-split: ₹${parsed.amount}`, 1800);
+          if (navigator.vibrate) navigator.vibrate(25);
+        }
+      }
+    });
+
+    // =========================================================================
+    // ⚡ IN-APP WEB SPEECH ENGINE (STRICT USER-CLICK TOGGLE)
+    // =========================================================================
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isRecordingActive = false;
+    let finalTranscribedBuffer = '';
 
     function getSpeechInstance() {
       if (!SpeechRecognition) return null;
@@ -745,7 +772,7 @@
 
       micBtn.className = "w-12 h-12 bg-[#13382B] text-[#DDF2D8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition";
       micIcon.className = "fa-solid fa-microphone text-base";
-      voiceLiveHint.textContent = "💡 Click mic to speak name & amount. Click again to stop.";
+      voiceLiveHint.textContent = "💡 Click mic (or use Gboard mic) to speak name & amount.";
       voiceLiveHint.className = "text-[10px] text-slate-400 font-medium px-1";
 
       const parsed = parseSpokenInput(nameInput.value);
@@ -763,7 +790,7 @@
       }
     }
 
-    // STRICT USER-CLICK TOGGLE
+    // STRICT USER CLICK TOGGLE
     micBtn.addEventListener('click', () => {
       if (isRecordingActive) stopVoiceRecording();
       else startVoiceRecording();
@@ -978,7 +1005,6 @@
 
       if (!name || isNaN(amount)) return;
 
-      // Duplicate Check to prevent accidental repeat entry
       const existing = records.find(r => r.name.toLowerCase().trim() === name.toLowerCase().trim());
       if (existing) {
         if (!confirm(`Warning: "${name}" is already registered (₹${existing.amount.toLocaleString('en-IN')}). Add again?`)) {
