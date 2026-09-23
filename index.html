@@ -54,7 +54,7 @@
 
     <div class="flex items-center gap-2">
       <!-- Quick Add Pill Button -->
-      <button onclick="openAddModal(false)" class="bg-[#DDF2D8] hover:bg-[#cdebc7] text-[#13382B] text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 shadow-2xs active:scale-95 transition">
+      <button onclick="openAddModal()" class="bg-[#DDF2D8] hover:bg-[#cdebc7] text-[#13382B] text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 shadow-2xs active:scale-95 transition">
         <i class="fa-solid fa-plus text-[10px]"></i>
         <span>Add gift</span>
       </button>
@@ -99,23 +99,27 @@
           </div>
         </div>
 
-        <!-- Hero Actions -->
+        <!-- Hero Actions (Only opens modal, does not auto-record) -->
         <div class="mt-5 space-y-2">
-          <!-- Voice Record with Single-shot Parser -->
-          <button onclick="openAddModal(true)" class="w-full bg-[#DDF2D8] text-[#13382B] font-extrabold text-xs py-3 px-4 rounded-2xl flex items-center justify-between shadow-sm active:scale-95 transition">
-            <div class="flex items-center gap-2">
-              <i class="fa-solid fa-microphone text-sm"></i>
-              <span>One-shot Voice (Name + Amount)</span>
+          <button onclick="openAddModal()" class="w-full bg-[#DDF2D8] text-[#13382B] font-extrabold text-xs py-3.5 px-4 rounded-2xl flex items-center justify-between shadow-sm active:scale-95 transition">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-xl bg-[#13382B] text-white flex items-center justify-center text-xs">
+                <i class="fa-solid fa-plus"></i>
+              </div>
+              <div class="text-left">
+                <p class="leading-none text-xs font-black">Add New Gift</p>
+                <p class="text-[10px] text-emerald-800 font-medium mt-0.5">Voice or Manual Entry</p>
+              </div>
             </div>
             <i class="fa-solid fa-arrow-right text-xs"></i>
           </button>
 
           <div class="grid grid-cols-2 gap-2 pt-1">
-            <button onclick="openAddModal(false)" class="text-center font-bold text-xs py-2 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
-              Enter manually
+            <button onclick="switchTab('history')" class="text-center font-bold text-xs py-2.5 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
+              View History 📋
             </button>
-            <button onclick="switchTab('analytics')" class="text-center font-bold text-xs py-2 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
-              Cash tally 🧮
+            <button onclick="switchTab('analytics')" class="text-center font-bold text-xs py-2.5 text-white/90 bg-white/10 hover:bg-white/15 rounded-xl transition">
+              Cash Tally 🧮
             </button>
           </div>
         </div>
@@ -159,7 +163,7 @@
         </button>
       </div>
 
-      <!-- Filter Chips (Including Return Status Filter) -->
+      <!-- Filter Chips -->
       <div class="flex items-center gap-1.5 overflow-x-auto text-xs no-scrollbar py-0.5">
         <button class="filter-chip px-3 py-1.5 rounded-xl font-extrabold bg-[#13382B] text-white shadow-2xs shrink-0" data-filter="all">All</button>
         <button class="filter-chip px-3 py-1.5 rounded-xl font-bold bg-white border border-[#E3ECE2] text-amber-700 shrink-0" data-filter="to-return">⏳ To Return</button>
@@ -258,7 +262,7 @@
         </div>
 
         <div class="pt-1">
-          <button id="exportCsvBtn" class="w-full bg-[#13382B] text-white py-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
+          <button id="exportCsvBtnSettings" class="w-full bg-[#13382B] text-white py-3 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
             <i class="fa-solid fa-file-excel text-emerald-300"></i>
             <span>Download Excel backup (CSV)</span>
           </button>
@@ -268,16 +272,25 @@
 
   </main>
 
-  <!-- MODAL: ADD GIFT (Single-Shot Voice + Mode) -->
+  <!-- MODAL: ADD GIFT -->
   <div id="addModal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-end justify-center">
-    <div class="bg-white w-full max-w-md rounded-t-[32px] p-5 space-y-4 shadow-2xl animate-in slide-in-from-bottom duration-200">
+    <div class="bg-white w-full max-w-md rounded-t-[32px] p-5 space-y-3.5 shadow-2xl animate-in slide-in-from-bottom duration-200">
       
       <div class="flex justify-between items-center border-b pb-2.5">
         <div>
           <h3 class="text-base font-extrabold text-[#13382B]">New gift entry</h3>
-          <p class="text-[11px] text-slate-400">Speak name & amount together</p>
+          <p class="text-[11px] text-slate-400">Speak or type guest details</p>
         </div>
         <button onclick="closeAddModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- Realtime AI Speech Feedback Badge -->
+      <div id="voiceParsePreview" class="hidden bg-[#DDF2D8] border border-emerald-300 p-2 rounded-xl text-xs flex items-center justify-between">
+        <div class="flex items-center gap-1.5 overflow-hidden">
+          <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse shrink-0"></span>
+          <p id="voiceParsePreviewText" class="font-bold text-[#13382B] truncate text-[11px]"></p>
+        </div>
+        <span class="text-[10px] text-emerald-800 font-extrabold shrink-0 bg-white/60 px-1.5 py-0.5 rounded-md">Live Detected</span>
       </div>
 
       <!-- Realtime Manglish Suggestion Bar -->
@@ -292,15 +305,15 @@
         <div class="space-y-1">
           <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Guest Name / Place</label>
           <div class="flex gap-2">
-            <!-- SINGLE-SHOT LIVE STREAMING VOICE BUTTON -->
+            <!-- STRICT USER-CLICK ONLY VOICE BUTTON -->
             <button type="button" id="micBtn" 
                     class="w-12 h-12 bg-[#13382B] text-[#DDF2D8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm active:scale-95 transition">
               <i id="micIcon" class="fa-solid fa-microphone text-base"></i>
             </button>
-            <input type="text" id="nameInput" required placeholder="eg: സുരേഷ് കോഴിക്കോട് 1000..."
+            <input type="text" id="nameInput" required placeholder="Type or click mic (eg: suresh 1500)..."
                    class="w-full bg-[#F3F6F3] border border-slate-200 rounded-2xl px-3.5 py-2.5 text-xs font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-[#13382B]">
           </div>
-          <p id="voiceLiveHint" class="text-[10px] text-slate-400 font-medium px-1">💡 Tip: Speak name and amount together (eg: Suresh 1000).</p>
+          <p id="voiceLiveHint" class="text-[10px] text-slate-400 font-medium px-1">💡 Click mic to speak name & amount. Click again to stop.</p>
         </div>
 
         <!-- Mode & Category -->
@@ -432,7 +445,7 @@
   </nav>
 
   <script>
-    // ⚠️ REPLACE WITH YOUR APPS SCRIPT WEB APP URL
+    // ⚠️ REPLACE THIS WITH YOUR APPS SCRIPT WEB APP URL
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4KQ8DpBAW19B6Hdo2cI2yncVWsrIdTYUNUoPusJSk5yWZNYQotL8-Ux_rJ6t19-z/exec";
 
     let records = JSON.parse(localStorage.getItem('wedding_registry_data')) || [];
@@ -448,6 +461,8 @@
     const micBtn = document.getElementById('micBtn');
     const micIcon = document.getElementById('micIcon');
     const voiceLiveHint = document.getElementById('voiceLiveHint');
+    const voiceParsePreview = document.getElementById('voiceParsePreview');
+    const voiceParsePreviewText = document.getElementById('voiceParsePreviewText');
     const entryForm = document.getElementById('entryForm');
     const historyFeed = document.getElementById('historyFeed');
     const homeRecentFeed = document.getElementById('homeRecentFeed');
@@ -460,7 +475,7 @@
     const syncNowBtn = document.getElementById('syncNowBtn');
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
-    const exportCsvBtn = document.getElementById('exportCsvBtn');
+    const exportCsvBtnSettings = document.getElementById('exportCsvBtnSettings');
     const settingsPrivacyBtn = document.getElementById('settingsPrivacyBtn');
     const settingsPrivacyIcon = document.getElementById('settingsPrivacyIcon');
     const settingsSyncText = document.getElementById('settingsSyncText');
@@ -482,7 +497,25 @@
       setTimeout(() => toast.classList.add('hidden'), duration);
     }
 
+    // Safely parse timestamps from Sheet (e.g. 23/09/2026 10:15 AM)
+    function parseTimestampSafe(ts) {
+      if (!ts) return Date.now();
+      const parsed = Date.parse(ts);
+      if (!isNaN(parsed)) return parsed;
+      const m = ts.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[,\s]+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?)?/i);
+      if (m) {
+        let d = parseInt(m[1], 10), mo = parseInt(m[2], 10) - 1, y = parseInt(m[3], 10);
+        let h = m[4] ? parseInt(m[4], 10) : 0, min = m[5] ? parseInt(m[5], 10) : 0;
+        let ap = m[7] ? m[7].toLowerCase() : null;
+        if (ap === 'pm' && h < 12) h += 12;
+        if (ap === 'am' && h === 12) h = 0;
+        return new Date(y, mo, d, h, min).getTime();
+      }
+      return Date.now();
+    }
+
     function saveLocal() {
+      records.sort((a, b) => (b.localTimestamp || 0) - (a.localTimestamp || 0));
       localStorage.setItem('wedding_registry_data', JSON.stringify(records));
       renderUI();
     }
@@ -499,15 +532,16 @@
       const activeNav = document.getElementById(`nav-${tabName}`);
       activeNav.className = "nav-item flex flex-col items-center gap-1 text-[#13382B]";
       activeNav.querySelector('div').className = "w-10 h-6 rounded-full bg-[#DDF2D8] flex items-center justify-center";
+      
+      // Stop mic if running when switching tabs
+      stopVoiceRecording();
     }
 
-    function openAddModal(autoVoice = false) {
+    // Open Modal WITHOUT starting voice auto-recording
+    function openAddModal() {
       document.getElementById('addModal').classList.remove('hidden');
-      if (autoVoice) {
-        setTimeout(startVoiceRecording, 300);
-      } else {
-        nameInput.focus();
-      }
+      voiceParsePreview.classList.add('hidden');
+      nameInput.focus();
     }
 
     function closeAddModal() {
@@ -528,59 +562,94 @@
     });
 
     // =========================================================================
-    // ⚡ FEATURE 1: SINGLE-SHOT VOICE PARSER (Name + Malayalam Amount Auto-split)
+    // ⚡ HIGH-ACCURACY MALAYALAM SPEECH & PARSER ENGINE
     // =========================================================================
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isRecordingActive = false;
-    let baseSpokenText = '';
+    let finalTranscribedBuffer = '';
 
-    // Malayalam words to numbers mapping
-    const malayalamNumberWords = {
-      'നൂറു': 100, 'നൂറ്': 100, 'ഇരുന്നൂറ്': 200, 'മുന്നൂറ്': 300, 'നാനൂറ്': 400,
-      'അഞ്ഞൂറ്': 500, 'അഞ്ഞൂറു': 500, 'അറുന്നൂറ്': 600, 'എഴുന്നൂറ്': 700, 'എണ്ണൂറ്': 800, 'തൊള്ളായിരം': 900,
-      'ആയിരം': 1000, 'ആയിരത്തി': 1000, 'രണ്ടായിരം': 2000, 'മൂവായിരം': 3000, 'നാലായിരം': 4000,
-      'അയ്യായിരം': 5000, 'അഞ്ചായിരം': 5000, 'ആറായിരം': 6000, 'ഏഴായിരം': 7000, 'എട്ടായിരം': 8000, 'ഒമ്പതിനായിരം': 9000,
-      'പതിനായിരം': 10000, 'ഇരുപതിനായിരം': 20000, 'ലക്ഷം': 100000
-    };
-
-    function parseSpokenInput(fullText) {
-      if (!fullText) return;
-      let text = fullText.trim();
+    function parseSpokenInput(rawText) {
+      if (!rawText) return { name: '', amount: null, mode: null };
+      let text = rawText.trim();
+      let detectedMode = null;
+      let calculatedAmount = null;
 
       // 1. Detect Payment Mode
-      if (/(upi|gpay|google pay|ഗൂഗിൾ പേ|യുപിഐ)/i.test(text)) {
-        modeUpiBtn.click();
-        text = text.replace(/(upi|gpay|google pay|ഗൂഗിൾ പേ|യുപിഐ)/gi, '');
-      } else if (/(cash|ക്യാഷ്|പണം)/i.test(text)) {
-        modeCashBtn.click();
-        text = text.replace(/(cash|ക്യാഷ്|പണം)/gi, '');
+      if (/(upi|gpay|google pay|ഗൂഗിൾ പേ|ജിപേ|യുപിഐ|ഓൺലൈൻ|അക്കൗണ്ട്)/i.test(text)) {
+        detectedMode = 'UPI';
+        text = text.replace(/(upi|gpay|google pay|ഗൂഗിൾ പേ|ജിപേ|യുപിഐ|ഓൺലൈൻ|അക്കൗണ്ട്)/gi, ' ');
+      } else if (/(cash|ക്യാഷ്|പണം|നേരിട്ട്|കയ്യിൽ)/i.test(text)) {
+        detectedMode = 'Cash';
+        text = text.replace(/(cash|ക്യാഷ്|പണം|നേരിട്ട്|കയ്യിൽ)/gi, ' ');
       }
 
-      // 2. Detect & Extract Number Digits (e.g. 500, 1000)
-      let extractedAmount = null;
-      const digitMatch = text.match(/\b\d{2,6}\b/);
+      // 2. Normalize commas inside numbers (e.g., "1,000" -> "1000")
+      text = text.replace(/(\d),(\d)/g, '$1$2');
+
+      // 3. Extract Digit Numbers if spoken directly (e.g. 500, 1000, 2500)
+      const digitMatch = text.match(/\b\d{2,7}\b/);
       if (digitMatch) {
-        extractedAmount = parseInt(digitMatch[0]);
-        text = text.replace(digitMatch[0], '');
+        calculatedAmount = parseInt(digitMatch[0], 10);
+        text = text.replace(digitMatch[0], ' ');
       } else {
-        // 3. Detect Malayalam Number Words (e.g. ആയിരം, അഞ്ഞൂറ്)
-        for (let word in malayalamNumberWords) {
-          if (text.includes(word)) {
-            extractedAmount = malayalamNumberWords[word];
-            text = text.replace(word, '');
+        // 4. Advanced Malayalam Compound Numbers
+        const combinations = [
+          { pattern: /(രണ്ടായിരത്തിയഞ്ഞൂറ്|രണ്ടായിരത്തി\s*അഞ്ഞൂറ്)/i, value: 2500 },
+          { pattern: /(ആയിരത്തിയഞ്ഞൂറ്|ആയിരത്തി\s*അഞ്ഞൂറ്)/i, value: 1500 },
+          { pattern: /(ആയിരത്തി\s*ഒരുനൂറ്|ആയിരത്തിയിരുന്നൂറ്)/i, value: 1200 },
+          { pattern: /(മൂവായിരത്തി\s*അഞ്ഞൂറ്|മൂവായിരത്തിയഞ്ഞൂറ്)/i, value: 3500 },
+          { pattern: /(അയ്യായിരത്തി\s*അഞ്ഞൂറ്|അയ്യായിരത്തിയഞ്ഞൂറ്)/i, value: 5500 },
+          { pattern: /പതിനായിരം/i, value: 10000 },
+          { pattern: /ഒമ്പതിനായിരം/i, value: 9000 },
+          { pattern: /എട്ടായിരം/i, value: 8000 },
+          { pattern: /ഏഴായിരം/i, value: 7000 },
+          { pattern: /ആറായിരം/i, value: 6000 },
+          { pattern: /(അയ്യായിരം|അഞ്ചായിരം)/i, value: 5000 },
+          { pattern: /നാലായിരം/i, value: 4000 },
+          { pattern: /മൂവായിരം/i, value: 3000 },
+          { pattern: /രണ്ടായിരം/i, value: 2000 },
+          { pattern: /(ആയിരത്തി|ആയിരം)/i, value: 1000 },
+          { pattern: /തൊള്ളായിരം/i, value: 900 },
+          { pattern: /എണ്ണൂറ്/i, value: 800 },
+          { pattern: /എഴുന്നൂറ്/i, value: 700 },
+          { pattern: /അറുന്നൂറ്/i, value: 600 },
+          { pattern: /(അഞ്ഞൂറ്|അഞ്ഞൂറു)/i, value: 500 },
+          { pattern: /നാനൂറ്/i, value: 400 },
+          { pattern: /മുന്നൂറ്/i, value: 300 },
+          { pattern: /ഇരുന്നൂറ്/i, value: 200 },
+          { pattern: /(നൂറ്റി|നൂറ്|നൂറു)/i, value: 100 }
+        ];
+
+        let tot = 0;
+        let foundAny = false;
+        for (const item of combinations) {
+          if (item.pattern.test(text)) {
+            tot += item.value;
+            text = text.replace(item.pattern, ' ');
+            foundAny = true;
             break;
           }
         }
+
+        // Catch hundred if said separately (e.g. ആയിരം + അഞ്ഞൂറ്)
+        if (tot === 1000 || tot === 2000 || tot === 3000 || tot === 5000) {
+          for (const hItem of combinations.slice(15)) {
+            if (hItem.pattern.test(text)) {
+              tot += hItem.value;
+              text = text.replace(hItem.pattern, ' ');
+              break;
+            }
+          }
+        }
+
+        if (foundAny) calculatedAmount = tot;
       }
 
-      // 4. Clean up noise words like "രൂപ", "rupees", "rs"
-      text = text.replace(/(രൂപ|rupees|rupee|rs)/gi, '').trim();
+      // 5. Clean noise filler words
+      text = text.replace(/(രൂപ|rupees|rupee|rs|ആണ്|തന്നത്|തന്നു|തന്ന)/gi, ' ').replace(/\s+/g, ' ').trim();
 
-      if (extractedAmount) {
-        amountInput.value = extractedAmount;
-      }
-      nameInput.value = text;
+      return { name: text, amount: calculatedAmount, mode: detectedMode };
     }
 
     function getSpeechInstance() {
@@ -591,28 +660,39 @@
       rec.interimResults = true;
 
       rec.onresult = (e) => {
-        let streamText = '';
-        for (let i = 0; i < e.results.length; ++i) {
-          streamText += e.results[i][0].transcript;
+        let interimTranscript = '';
+        for (let i = e.resultIndex; i < e.results.length; ++i) {
+          if (e.results[i].isFinal) {
+            finalTranscribedBuffer += ' ' + e.results[i][0].transcript;
+          } else {
+            interimTranscript += e.results[i][0].transcript;
+          }
         }
-        nameInput.value = (baseSpokenText + ' ' + streamText).trim();
+
+        const fullSpoken = (finalTranscribedBuffer + ' ' + interimTranscript).trim();
+        nameInput.value = fullSpoken;
+
+        const parsed = parseSpokenInput(fullSpoken);
+        if (parsed.amount || parsed.mode) {
+          voiceParsePreview.classList.remove('hidden');
+          voiceParsePreviewText.textContent = `Name: "${parsed.name || '...'}" | ₹ ${parsed.amount || '0'} | ${parsed.mode || selectedMode}`;
+        }
       };
 
       rec.onerror = (e) => {
         if (e.error === 'not-allowed') {
-          showToast("⚠️ Microphone Permission Blocked in Browser Settings.");
+          showToast("⚠️ Microphone permission denied in Chrome!");
           stopVoiceRecording();
         }
       };
 
       rec.onend = () => {
         if (isRecordingActive) {
-          baseSpokenText = nameInput.value.trim();
           setTimeout(() => {
             if (isRecordingActive) {
               try { rec.start(); } catch(err){}
             }
-          }, 40);
+          }, 50);
         }
       };
 
@@ -637,18 +717,21 @@
 
       nameInput.blur();
       isRecordingActive = true;
-      baseSpokenText = nameInput.value.trim();
+      finalTranscribedBuffer = '';
+      nameInput.value = '';
+      amountInput.value = '';
+      voiceParsePreview.classList.add('hidden');
 
       micBtn.className = "w-12 h-12 bg-red-600 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-lg mic-live-pulse transition";
       micIcon.className = "fa-solid fa-stop text-base";
-      voiceLiveHint.textContent = "🎙️ Listening... Say name & amount (Tap red button to finish).";
+      voiceLiveHint.textContent = "🎙️ Listening... Say name & amount (Tap red button when finished).";
       voiceLiveHint.className = "text-[10px] text-red-600 font-bold px-1";
 
       if (!recognition) recognition = getSpeechInstance();
       try {
         recognition.start();
       } catch(e) {
-        try { recognition.stop(); setTimeout(() => recognition.start(), 100); } catch(err){}
+        try { recognition.stop(); setTimeout(() => recognition.start(), 80); } catch(err){}
       }
     }
 
@@ -662,17 +745,25 @@
 
       micBtn.className = "w-12 h-12 bg-[#13382B] text-[#DDF2D8] rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition";
       micIcon.className = "fa-solid fa-microphone text-base";
-      voiceLiveHint.textContent = "💡 Tip: Speak name and amount together (eg: Suresh 1000).";
+      voiceLiveHint.textContent = "💡 Click mic to speak name & amount. Click again to stop.";
       voiceLiveHint.className = "text-[10px] text-slate-400 font-medium px-1";
 
-      // Trigger One-shot split
-      if (nameInput.value.trim()) {
-        parseSpokenInput(nameInput.value);
-        showToast(`✓ Processed: "${nameInput.value}"`);
-        if (!amountInput.value) amountInput.focus();
+      const parsed = parseSpokenInput(nameInput.value);
+      if (parsed.name) nameInput.value = parsed.name;
+      if (parsed.amount) amountInput.value = parsed.amount;
+      if (parsed.mode === 'UPI') modeUpiBtn.click();
+      else if (parsed.mode === 'Cash') modeCashBtn.click();
+
+      voiceParsePreview.classList.add('hidden');
+
+      if (!amountInput.value) {
+        amountInput.focus();
+      } else {
+        showToast(`✓ Auto-filled: ${nameInput.value} (₹${amountInput.value})`, 2500);
       }
     }
 
+    // STRICT USER-CLICK TOGGLE
     micBtn.addEventListener('click', () => {
       if (isRecordingActive) stopVoiceRecording();
       else startVoiceRecording();
@@ -747,9 +838,9 @@
       suggestionBar.classList.remove('hidden');
     }
 
-    // =========================================================================
-    // ⚡ FEATURE 2: RETURN GIFT TOGGLE ENGINE (Pending ⏳ vs Returned ✅)
-    // =========================================================================
+    // ==========================================
+    // 3. RETURN GIFT TOGGLE ENGINE
+    // ==========================================
     window.toggleReturnStatus = function(id) {
       const item = records.find(r => r.id === id);
       if (!item) return;
@@ -758,7 +849,6 @@
       saveLocal();
       showToast(item.returnStatus === 'returned' ? `✅ Marked as Returned to ${item.name}` : `⏳ Marked as Pending for ${item.name}`);
 
-      // Sync state change with Google Sheet
       fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -768,7 +858,7 @@
     };
 
     // ==========================================
-    // 3. UI RENDERING (With Return Chips)
+    // 4. UI RENDERING
     // ==========================================
     function renderUI() {
       const q = searchInput.value.toLowerCase().trim();
@@ -777,7 +867,6 @@
         (r.category && r.category.toLowerCase().includes(q))
       );
 
-      // Filters
       if (currentFilter === 'to-return') list = list.filter(r => (r.returnStatus || 'pending') === 'pending');
       else if (currentFilter === 'returned') list = list.filter(r => r.returnStatus === 'returned');
       else if (currentFilter === 'mode-cash') list = list.filter(r => r.mode === 'Cash');
@@ -825,7 +914,7 @@
         });
       }
 
-      // Render Full History Cards with Return Gift Toggle
+      // Render Full History Cards
       historyFeed.innerHTML = '';
       if (list.length === 0) {
         historyFeed.innerHTML = `
@@ -855,19 +944,17 @@
               </div>
             </div>
 
-            <!-- Action Row: Return Toggle & Edit/Delete -->
             <div class="flex items-center justify-between pt-1 border-t border-slate-100">
-              <!-- Return Status Interactive Pill -->
               <button onclick="toggleReturnStatus('${item.id}')" 
                       class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold flex items-center gap-1.5 transition ${isReturned ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'}">
                 <span>${isReturned ? 'Return: ✅ Done' : 'Return: ⏳ Pending'}</span>
               </button>
 
               <div class="flex gap-1.5">
-                <button onclick="openEditModal('${item.id}')" class="bg-[#F3F6F3] hover:bg-[#E3ECE2] text-[#13382B] text-xs font-bold px-3 py-1 rounded-xl transition">
+                <button onclick="openEditModal('${item.id}')" class="bg-[#F3F6F3] hover:bg-[#E3ECE2] text-[#13382B] text-xs font-bold px-3 py-1.5 rounded-xl transition">
                   Edit
                 </button>
-                <button onclick="deleteRecord('${item.id}')" class="bg-[#FFF0F0] hover:bg-[#FFE0E0] text-rose-700 text-xs font-bold px-3 py-1 rounded-xl transition">
+                <button onclick="deleteRecord('${item.id}')" class="bg-[#FFF0F0] hover:bg-[#FFE0E0] text-rose-700 text-xs font-bold px-3 py-1.5 rounded-xl transition">
                   Delete
                 </button>
               </div>
@@ -881,7 +968,7 @@
     }
 
     // ==========================================
-    // 4. SUBMISSION & EDIT LOGIC
+    // 5. SUBMISSION & EDIT LOGIC
     // ==========================================
     entryForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -891,13 +978,21 @@
 
       if (!name || isNaN(amount)) return;
 
+      // Duplicate Check to prevent accidental repeat entry
+      const existing = records.find(r => r.name.toLowerCase().trim() === name.toLowerCase().trim());
+      if (existing) {
+        if (!confirm(`Warning: "${name}" is already registered (₹${existing.amount.toLocaleString('en-IN')}). Add again?`)) {
+          return;
+        }
+      }
+
       const newRecord = {
         id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
         name: name,
         amount: amount,
         category: category,
         mode: selectedMode,
-        returnStatus: 'pending', // Default return state
+        returnStatus: 'pending',
         localTimestamp: Date.now(),
         dateString: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }),
         syncStatus: 'pending'
@@ -974,7 +1069,7 @@
     };
 
     // ==========================================
-    // 5. CASH TALLY COUNTER
+    // 6. CASH TALLY COUNTER
     // ==========================================
     document.querySelectorAll('.denom-input').forEach(inp => {
       inp.addEventListener('input', () => {
@@ -1027,7 +1122,7 @@
     }
 
     // ==========================================
-    // 6. GOOGLE SHEETS BATCH SYNC ENGINE
+    // 7. GOOGLE SHEETS BATCH SYNC ENGINE
     // ==========================================
     async function syncWithSheet(isSilent = false) {
       if (SCRIPT_URL.includes("YOUR_APPS_SCRIPT")) return;
@@ -1067,7 +1162,7 @@
                 returnStatus: row.returnStatus || 'pending',
                 dateString: row.timestamp || 'Recorded',
                 syncStatus: 'synced',
-                localTimestamp: new Date(row.timestamp || 0).getTime() || Date.now()
+                localTimestamp: parseTimestampSafe(row.timestamp)
               });
             }
           });
@@ -1121,7 +1216,23 @@
       }
     }
 
-    // Quick Amounts & Filters
+    // CSV Download Functionality
+    function downloadCSV() {
+      if (records.length === 0) return alert("No records to export.");
+      let csv = "Time,Name,Amount,Payment Mode,Category,Return Status\n";
+      records.forEach(r => {
+        const cleanName = (r.name || '').replace(/"/g, '""');
+        csv += `"${r.dateString}","${cleanName}",${r.amount},"${r.mode || 'Cash'}","${r.category || 'General'}","${r.returnStatus || 'pending'}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `Wedding_Gifts_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+    }
+
+    if (exportCsvBtnSettings) exportCsvBtnSettings.addEventListener('click', downloadCSV);
+
     document.querySelectorAll('.quick-amt').forEach(btn => btn.addEventListener('click', () => amountInput.value = btn.dataset.val));
     
     document.querySelectorAll('.filter-chip').forEach(btn => {
@@ -1139,22 +1250,10 @@
       renderUI();
     });
 
-    exportCsvBtn.addEventListener('click', () => {
-      if (records.length === 0) return alert("No records to export.");
-      let csv = "Time,Name,Amount,Payment Mode,Category,Return Status\n";
-      records.forEach(r => csv += `"${r.dateString}","${r.name}",${r.amount},"${r.mode || 'Cash'}","${r.category || 'General'}","${r.returnStatus || 'pending'}"\n`);
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Wedding_Gifts_${new Date().toISOString().slice(0,10)}.csv`;
-      a.click();
-    });
-
     searchInput.addEventListener('input', renderUI);
     searchBtn.addEventListener('click', renderUI);
     syncNowBtn.addEventListener('click', () => syncWithSheet(false));
 
-    // Load saved counts
     document.querySelectorAll('.denom-input').forEach(inp => {
       const val = inp.dataset.val;
       inp.value = denominationCounts[val] || '';
